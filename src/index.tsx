@@ -1,6 +1,8 @@
 import { ChakraProvider, extendTheme, theme as baseTheme } from '@chakra-ui/react';
+import { store } from 'app/store';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
@@ -23,10 +25,12 @@ const root = createRoot(container as HTMLElement);
 
 root.render(
     <React.StrictMode>
-        <ChakraProvider theme={theme}>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
-        </ChakraProvider>
+        <Provider store={store}>
+            <ChakraProvider theme={theme}>
+                <BrowserRouter>
+                    <App />
+                </BrowserRouter>
+            </ChakraProvider>
+        </Provider>
     </React.StrictMode>
 )
