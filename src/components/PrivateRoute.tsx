@@ -1,8 +1,15 @@
 import { useAppSelector } from 'app/hooks';
+import { UserRoles } from 'features/types';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-export const PrivateRoute: React.FC<{children: React.ReactElement}> = (props): JSX.Element => {
+type PrivateRouteProps = {
+    children: React.ReactElement;
+    roles?: UserRoles[]
+}
+
+export const PrivateRoute: React.FC<PrivateRouteProps> = (props): JSX.Element => {
+    const { children, roles } = props;
     const { user: authUser } = useAppSelector((state) => state.auth);
 
     if (!authUser) {
@@ -10,6 +17,12 @@ export const PrivateRoute: React.FC<{children: React.ReactElement}> = (props): J
         return <Navigate to='/account/login' />
     }
 
+    // check if route is restricted by role
+    if (roles && roles.indexOf(authUser.role) === -1) {
+        // role not authorized so redirect to home page
+        return <Navigate to='/' />
+    }
+
     // authorized so return child component
-    return props.children;
+    return children;
 }

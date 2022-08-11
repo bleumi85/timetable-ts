@@ -1,11 +1,12 @@
 import { Container } from '@chakra-ui/react';
 import { useAppDispatch, useAppSelector } from 'app/hooks';
 import { Nav, PrivateRoute } from 'components';
-import { Login } from 'features/account';
+import { Login, Profile } from 'features/account';
 import { authActions } from 'features/account/authSlice';
+import { UserRoles } from 'features/types';
 import { history } from 'helpers';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 const App: React.FC = (): JSX.Element => {
     const [showAdmin, setShowAdmin] = useState(false);
@@ -24,7 +25,7 @@ const App: React.FC = (): JSX.Element => {
 
     useEffect(() => {
         if (authUser) {
-            setShowAdmin(authUser.role === 'Admin');
+            setShowAdmin(authUser.role === UserRoles.Admin);
         } else {
             setShowAdmin(false);
         }
@@ -39,9 +40,29 @@ const App: React.FC = (): JSX.Element => {
                         path='/'
                         element={<PrivateRoute><div>Home</div></PrivateRoute>}
                     />
+                    <Route
+                        path='404'
+                        element={<div>Diese Seite existiert nicht</div>}
+                    />
                     <Route path='account'>
-                        <Route path='login' element={<Login />} />
+                        <Route
+                            path='login'
+                            element={<Login />}
+                        />
+                        <Route
+                            path='profile'
+                            element={<PrivateRoute>
+                                <Profile authUser={authUser} />
+                            </PrivateRoute>}
+                        />
                     </Route>
+                    <Route
+                        path='admin'
+                        element={<PrivateRoute roles={[UserRoles.Admin]}><div>ADMIN</div></PrivateRoute>}
+                    >
+
+                    </Route>
+                    {/* <Route path='*' element={<Navigate to='/404' />} /> */}
                 </Routes>
             </Container>
         </>

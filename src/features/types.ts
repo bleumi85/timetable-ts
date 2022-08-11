@@ -1,3 +1,9 @@
+// enums
+export enum UserRoles {
+    User = 'User',
+    Admin = 'Admin'
+}
+
 // interfaces
 
 interface IUser {
@@ -5,7 +11,7 @@ interface IUser {
     firstName: string;
     lastName: string;
     email: string;
-    role: 'User' | 'Admin';
+    role: UserRoles;
     expirationDate: Date;
     created: Date,
     updated?: Date;
