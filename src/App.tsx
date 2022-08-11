@@ -3,6 +3,8 @@ import { useAppDispatch, useAppSelector } from 'app/hooks';
 import { Nav, PrivateRoute } from 'components';
 import { Login, Profile } from 'features/account';
 import { authActions } from 'features/account/authSlice';
+import { Admin, AdminMain } from 'features/admin';
+import { AdminAccounts, AdminAccountsForm } from 'features/admin/accounts';
 import { UserRoles } from 'features/types';
 import { history } from 'helpers';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -58,9 +60,15 @@ const App: React.FC = (): JSX.Element => {
                     </Route>
                     <Route
                         path='admin'
-                        element={<PrivateRoute roles={[UserRoles.Admin]}><div>ADMIN</div></PrivateRoute>}
+                        element={<PrivateRoute roles={[UserRoles.Admin]}><Admin /></PrivateRoute>}
                     >
-
+                        <Route index element={<AdminMain />} />
+                        <Route path='accounts'>
+                            <Route index element={<AdminAccounts />} />
+                            <Route path='add' element={<AdminAccountsForm />} />
+                            <Route path='edit/:id' element={<AdminAccountsForm />} />
+                            <Route path='*' element={<Navigate to='/admin/accounts' />} />
+                        </Route>
                     </Route>
                     {/* <Route path='*' element={<Navigate to='/404' />} /> */}
                 </Routes>

@@ -1,5 +1,5 @@
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import { FormControl, FormLabel, IconButton, Input as CuiInput, InputGroup, InputLeftElement, InputProps as CuiInputProps, InputRightElement, useDisclosure } from '@chakra-ui/react';
+import { FormControl, FormErrorMessage, FormLabel, IconButton, Input as CuiInput, InputGroup, InputLeftElement, InputProps as CuiInputProps, InputRightElement, useDisclosure } from '@chakra-ui/react';
 import React from 'react';
 
 interface InputProps extends Partial<CuiInputProps> {
@@ -38,6 +38,9 @@ export const Input: React.FC<InputProps> = (props): JSX.Element => {
                     </IconButton>
                 </InputRightElement>}
             </InputGroup>
+            {error && (
+                <FormErrorMessage>{error}</FormErrorMessage>
+            )}
         </FormControl>
     )
 }
