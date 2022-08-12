@@ -6,7 +6,7 @@ type ProfileProps = {
 }
 
 export const Profile: React.FC<ProfileProps> = (props): JSX.Element => {
-    const { authUser } = props;
+    // const { authUser } = props;
 
     return (
         <div>Profile Page</div>

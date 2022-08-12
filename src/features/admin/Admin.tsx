@@ -1,5 +1,5 @@
 import { Button, Heading, Stack } from '@chakra-ui/react';
-import { useGetAccountsQuery, useGetLocationsQuery, useGetTasksQuery } from 'features/timetable';
+import { useGetAccountsQuery, useGetLocationsQuery, useGetSchedulesQuery, useGetTasksQuery } from 'features/timetable';
 import { history } from 'helpers';
 import React from 'react';
 import { MdHouse, MdSchedule, MdTask } from 'react-icons/md';
@@ -56,20 +56,21 @@ export const Admin: React.FC = (): JSX.Element => {
 const OutletContainer: React.FC = (): JSX.Element => {
     const { data: accounts, isLoading: accountsIsLoading, error: accountsError } = useGetAccountsQuery();
     const { data: locations, isLoading: locationsIsLoading, error: locationsError } = useGetLocationsQuery();
+    const { data: schedules, isLoading: schedulesIsLoading, error: schedulesError } = useGetSchedulesQuery();
     const { data: tasks, isLoading: tasksIsLoading, error: tasksError } = useGetTasksQuery();
 
-    /* if (tasksError)
-        return <pre>{JSON.stringify(tasksError, null, 2)}</pre>
+    /* if (schedulesError)
+        return <pre>{JSON.stringify(schedulesError, null, 2)}</pre>
 
     return (
-        <pre>{JSON.stringify(tasks, null, 2)}</pre>
+        <pre>{JSON.stringify(schedules, null, 2)}</pre>
     ) */
 
     return (
         <Outlet context={{
-            data: { accounts, locations, tasks },
-            isLoading: { accountsIsLoading, locationsIsLoading, tasksIsLoading },
-            error: { accountsError, locationsError, tasksError }
+            data: { accounts, locations, schedules, tasks },
+            isLoading: { accountsIsLoading, locationsIsLoading, schedulesIsLoading, tasksIsLoading },
+            error: { accountsError, locationsError, schedulesError, tasksError }
         }} />
     )
 }

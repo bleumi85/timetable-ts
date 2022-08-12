@@ -6,6 +6,7 @@ import { authActions } from 'features/account/authSlice';
 import { Admin, AdminMain } from 'features/admin';
 import { AdminAccounts, AdminAccountsForm } from 'features/admin/accounts';
 import { AdminLocations, AdminLocationsForm } from 'features/admin/locations';
+import { AdminSchedules, AdminSchedulesForm } from 'features/admin/schedules';
 import { AdminTasks, AdminTasksForm } from 'features/admin/tasks';
 import { UserRoles } from 'features/types';
 import { history } from 'helpers';
@@ -76,6 +77,12 @@ const App: React.FC = (): JSX.Element => {
                             <Route path='add' element={<AdminLocationsForm />} />
                             <Route path='edit/:id' element={<AdminLocationsForm />} />
                             <Route path='*' element={<Navigate to='/admin/locations' />} />
+                        </Route>
+                        <Route path='schedules'>
+                            <Route index element={<AdminSchedules />} />
+                            <Route path='add' element={<AdminSchedulesForm />} />
+                            <Route path='edit/:id' element={<AdminSchedulesForm />} />
+                            <Route path='*' element={<Navigate to='/admin/schedules' />} />
                         </Route>
                         <Route path='tasks'>
                             <Route index element={<AdminTasks />} />

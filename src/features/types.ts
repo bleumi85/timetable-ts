@@ -41,15 +41,23 @@ interface ITaskRequest extends Omit<ITask, 'id'>, Partial<Pick<ITask, 'id'>> { }
 
 interface ILocationRequest extends Omit<ILocation, 'id'>, Partial<Pick<ILocation, 'id'>> { }
 
+interface IScheduleRequest extends Omit<ISchedule, 'id'>, Partial<Pick<ISchedule, 'id'>> { }
+
 interface ISchedule {
     id: string;
     timeFrom: Date;
     timeTo: Date;
     remark?: string;
     isTransferred: boolean;
+    accountId: string;
     locationId: string;
     taskId: string;
-    accountId: string;
+}
+
+interface IScheduleAdmin extends Omit<ISchedule, 'accountId' | 'locationId' | 'taskId'> {
+    account: Pick<IUser, 'id' | 'firstName' | 'lastName'>,
+    location: Omit<ILocation, 'accountId'>,
+    task: Omit<ITask, 'accountId'>
 }
 
 interface IUserRequest extends Partial<Pick<IUser, 'id' | 'firstName' | 'lastName' | 'email' | 'role'>> {
@@ -65,6 +73,10 @@ export type LocationRequest = ILocationRequest;
 
 export type Task = ITask;
 export type TaskRequest = ITaskRequest;
+
+export type Schedule = ISchedule;
+export type ScheduleAdmin = IScheduleAdmin;
+export type ScheduleRequest = IScheduleRequest;
 
 interface IAuthState {
     user: IUser | undefined,

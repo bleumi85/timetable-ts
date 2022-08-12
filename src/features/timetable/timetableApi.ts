@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { RootState } from 'app/store';
-import { Location, LocationRequest, Task, TaskRequest, User, UserRequest } from 'features/types';
+import { Location, LocationRequest, Schedule, ScheduleAdmin, Task, TaskRequest, User, UserRequest } from 'features/types';
 
 const baseUrl = process.env.REACT_APP_API_URL;
 
@@ -71,7 +71,7 @@ export const timetableApi = createApi({
         addLocation: build.mutation<LocationRequest, Partial<LocationRequest>>({
             query: (body) => ({
                 url: '/locations',
-                method: 'post',
+                method: 'POST',
                 body
             }),
             invalidatesTags: [{ type: 'Locations', id: 'LocationLIST' }]
@@ -83,15 +83,15 @@ export const timetableApi = createApi({
         updateLocation: build.mutation<LocationRequest, Partial<LocationRequest>>({
             query: ({ id, ...patch }) => ({
                 url: `/locations/${id}`,
-                method: 'patch',
+                method: 'PATCH',
                 body: patch
             }),
-            invalidatesTags: (result, error, { id }) => [{ type: 'Tasks', id }]
+            invalidatesTags: (result, error, { id }) => [{ type: 'Locations', id }]
         }),
         deleteLocation: build.mutation<{ message: string }, string>({
             query: (id) => ({
                 url: `/locations/${id}`,
-                method: 'delete'
+                method: 'DELETE'
             }),
             invalidatesTags: (result, error, id) => [{ type: 'Locations', id }]
         }),
@@ -108,7 +108,7 @@ export const timetableApi = createApi({
         addTask: build.mutation<TaskRequest, Partial<TaskRequest>>({
             query: (body) => ({
                 url: '/tasks',
-                method: 'post',
+                method: 'POST',
                 body
             }),
             invalidatesTags: [{ type: 'Tasks', id: 'TaskLIST' }]
@@ -120,7 +120,7 @@ export const timetableApi = createApi({
         updateTask: build.mutation<TaskRequest, Partial<TaskRequest>>({
             query: ({ id, ...patch }) => ({
                 url: `/tasks/${id}`,
-                method: 'patch',
+                method: 'PATCH',
                 body: patch
             }),
             invalidatesTags: (result, error, { id }) => [{ type: 'Tasks', id }]
@@ -132,12 +132,27 @@ export const timetableApi = createApi({
             }),
             invalidatesTags: (result, error, id) => [{ type: 'Tasks', id }]
         }),
+        // Schedules
+        getSchedules: build.query<ScheduleAdmin[], void>({
+            query: () => '/schedules?include=account;location;task',
+            providesTags: (result) =>
+                result ?
+                    [
+                        ...result.map(({ id }) => ({ type: 'Schedules', id } as const)),
+                        { type: 'Schedules', id: 'ScheduleLIST' }
+                    ] : [{ type: 'Schedules', id: 'ScheduleLIST' }]
+        }),
+        getSchedule: build.query<Schedule, string | undefined>({
+            query: (id) => id ? `/schedules/${id}` : '/schedules/204',
+            providesTags: (result, error, id) => [{ type: 'Schedules', id }]
+        }),
     })
 });
 
 export const {
     useGetAccountsQuery, useAddAccountMutation, useGetAccountQuery, useUpdateAccountMutation, useDeleteAccountMutation,
     useGetLocationsQuery, useAddLocationMutation, useGetLocationQuery, useUpdateLocationMutation, useDeleteLocationMutation,
+    useGetSchedulesQuery, useGetScheduleQuery,
     useGetTasksQuery, useAddTaskMutation, useGetTaskQuery, useUpdateTaskMutation, useDeleteTaskMutation,
 } = timetableApi
 
