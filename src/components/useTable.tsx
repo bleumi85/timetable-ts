@@ -77,7 +77,7 @@ export function useTable<T>(data: T[], columns: ColumnDef<T, any>[], enableColum
 
     const TblFilter = (props: { children?: React.ReactElement }): JSX.Element => (
         <Stack direction='row' w='100%' spacing={4} justifyContent='flex-end'>
-            <Stack direction='row' flexGrow={1}>
+            <Stack direction='row' flexGrow={1} spacing={4}>
                 {table.getHeaderGroups().map(headerGroup => {
                     return headerGroup.headers.map((header) => {
                         return (
@@ -265,7 +265,7 @@ function Filter({ column }: { column: Column<any, unknown> }): JSX.Element {
         <>
             <Select
                 borderColor='secondary.500'
-                maxW='400px'
+                maxW='300px'
                 placeholder={`Suche... (${column.getFacetedUniqueValues().size})`}
                 value={(columnFilterValue ?? '') as string}
                 onChange={(e) => column.setFilterValue(e.target.value)}

@@ -1,11 +1,12 @@
 import { CheckIcon } from '@chakra-ui/icons';
-import { Button, Center, Progress, Stack, useToast } from '@chakra-ui/react';
+import { Avatar, Button, Center, HStack, Progress, Stack, useToast } from '@chakra-ui/react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useTable } from 'components';
 import { ApiAlert } from 'components/controls';
 import { getErrorMessage, useDeleteAccountMutation } from 'features/timetable';
 import { User } from 'features/types';
 import React, { useCallback, useMemo } from 'react';
+import { MdHouse, MdSchedule, MdTask } from 'react-icons/md';
 import { Link, useOutletContext } from 'react-router-dom';
 
 type OutletProps = {
@@ -79,14 +80,30 @@ const FormattedTable: React.FC<{ data: User[] }> = (props): JSX.Element => {
         columnHelper.accessor('role', {
             header: 'Rolle',
         }),
-        columnHelper.accessor('id', {
+        columnHelper.accessor(row => row, {
+            id: 'view',
             header: '',
             cell: info => {
-                const id = info.getValue();
+                const { schedules, locations, tasks } = info.getValue();
+                return (
+                    <HStack spacing={3} justifyContent='center'>
+                        {schedules.length > 0 && <Avatar size='sm' bg='secondary.500' color='white' icon={<MdSchedule fontSize='1.5rem' />} />}
+                        {locations.length > 0 && <Avatar size='sm' bg='secondary.500' color='white' icon={<MdHouse fontSize='1.5rem' />} />}
+                        {tasks.length > 0 && <Avatar size='sm' bg='secondary.500' color='white' icon={<MdTask fontSize='1.5rem' />} />}
+                    </HStack>
+                )
+            }
+        }),
+        columnHelper.accessor(row => row, {
+            id: 'actions',
+            header: '',
+            cell: info => {
+                const { id, schedules, locations, tasks } = info.getValue();
+                const disabled = (schedules.length + locations.length + tasks.length) > 0
                 return (
                     <Center>
                         <Link to={`edit/${id}`}><Button size='sm' colorScheme='secondary'>Bearbeiten</Button></Link>
-                        <Button size='sm' ml={4} colorScheme='red' onClick={() => onDelete(id)} disabled={isDeleting}>Löschen</Button>
+                        <Button size='sm' ml={4} colorScheme='red' onClick={() => onDelete(id)} disabled={isDeleting || disabled}>Löschen</Button>
                     </Center>
                 )
             },
@@ -101,13 +118,13 @@ const FormattedTable: React.FC<{ data: User[] }> = (props): JSX.Element => {
         <Stack direction='column' maxW='container.xl' spacing={4} p={2} >
             <TblFilter />
             <TblContainer>
-                <colgroup>
+                {/* <colgroup>
                     <col width='5%' />
                     <col width='27%' />
                     <col width='27%' />
                     <col width='11%' />
                     <col width='30%' />
-                </colgroup>
+                </colgroup> */}
                 <TblHead />
                 <TblBody />
             </TblContainer>
