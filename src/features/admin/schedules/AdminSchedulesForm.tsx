@@ -1,8 +1,9 @@
-import { Button, Container, Flex, Grid, GridItem, Heading, Progress, Stack, Text, useToast } from '@chakra-ui/react';
+import { Button, Container, Flex, Grid, GridItem, Heading, Progress, Stack, Text, Textarea, useToast } from '@chakra-ui/react';
 import { DatePicker, Select } from 'components/controls';
-import { useGetScheduleQuery } from 'features/timetable';
+import { getErrorMessage, useAddScheduleMutation, useGetScheduleQuery, useUpdateScheduleMutation } from 'features/timetable';
 import { Location, ScheduleRequest, SelectOption, Task, User, UserRoles } from 'features/types';
 import { Form, Formik, FormikHelpers } from 'formik';
+import { history } from 'helpers';
 import moment, { Moment } from 'moment';
 import React, { useMemo, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
@@ -17,6 +18,8 @@ export const AdminSchedulesForm: React.FC = (): JSX.Element => {
     const { data, isLoading } = useGetScheduleQuery(id);
     const { data: { accounts = [], locations = [], tasks = [] } }
         = useOutletContext<{ data: { accounts: User[], locations: Location[], tasks: Task[] } }>();
+    const [addSchedule] = useAddScheduleMutation();
+    const [updateSchedule] = useUpdateScheduleMutation();
 
     const [duration, setDuration] = useState<Moment>(
         data?.timeFrom && data?.timeTo ? moment.utc(moment(data?.timeTo).diff(moment(data?.timeFrom))) : moment('2000-01-01')
@@ -68,7 +71,8 @@ export const AdminSchedulesForm: React.FC = (): JSX.Element => {
         taskId: data?.taskId ?? '',
         timeFrom: data?.timeFrom ? new Date(data.timeFrom) : new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 8),
         timeTo: data?.timeTo ? new Date(data.timeTo) : new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 9),
-        isTransferred: false,
+        isTransferred: data?.isTransferred ?? false,
+        remark: data?.remark ?? ''
     }
 
     const validationSchema = Yup.object().shape({
@@ -92,11 +96,22 @@ export const AdminSchedulesForm: React.FC = (): JSX.Element => {
             )
     });
 
-    const onSubmit = (values: ScheduleRequest, { setSubmitting }: FormikHelpers<ScheduleRequest>) => {
-        setTimeout(() => {
+    const onSubmit = async (values: ScheduleRequest, { setSubmitting }: FormikHelpers<ScheduleRequest>) => {
+        try {
+            isAddMode ? await addSchedule(values).unwrap() : await updateSchedule({ ...values, id }).unwrap();
+            history.navigate && history.navigate('/admin/schedules');
+        } catch (err) {
+            const errMsg = getErrorMessage(err);
+            toast({
+                title: `Buchung konnte nicht ${isAddMode ? 'erstellt' : 'aktualisiert'} werden`,
+                description: errMsg,
+                status: 'error',
+                duration: 4000,
+                isClosable: true
+            })
+        } finally {
             setSubmitting(false);
-            alert(JSON.stringify(values, null, 2))
-        }, 500);
+        }
     };
 
     return (
@@ -154,6 +169,15 @@ export const AdminSchedulesForm: React.FC = (): JSX.Element => {
                                     <Text fontWeight='bold' mr={2}>Dauer: </Text>
                                     <Text>{duration.hours() > 0 ? duration.format('H:mm') + ' Std.' : duration.format('m') + ' Min.'}</Text>
                                 </Flex>
+                            </GridItem>
+                            <GridItem colSpan={6}>
+                                <Textarea
+                                    name='remark'
+                                    value={values.remark}
+                                    onChange={handleChange}
+                                    size='sm'
+                                    resize='none'
+                                />
                             </GridItem>
                         </Grid>
                         <Stack direction='row' justifyContent='flex-end' px={6} spacing={4}>

@@ -9,7 +9,7 @@ export const Admin: React.FC = (): JSX.Element => {
     const pathname = history.location?.pathname;
 
     return (
-        <Stack direction='column' w='100%' spacing={4} border='1px solid green'>
+        <Stack direction='column' w='100%' spacing={4}>
             <Heading color='primary.500'>Admin-Bereich</Heading>
             <Stack direction='row' spacing={4}>
                 <Link to='accounts'>
@@ -58,13 +58,6 @@ const OutletContainer: React.FC = (): JSX.Element => {
     const { data: locations, isLoading: locationsIsLoading, error: locationsError } = useGetLocationsQuery();
     const { data: schedules, isLoading: schedulesIsLoading, error: schedulesError } = useGetSchedulesQuery();
     const { data: tasks, isLoading: tasksIsLoading, error: tasksError } = useGetTasksQuery();
-
-    /* if (schedulesError)
-        return <pre>{JSON.stringify(schedulesError, null, 2)}</pre>
-
-    return (
-        <pre>{JSON.stringify(schedules, null, 2)}</pre>
-    ) */
 
     return (
         <Outlet context={{

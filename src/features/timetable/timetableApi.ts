@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { RootState } from 'app/store';
-import { Location, LocationRequest, Schedule, ScheduleAdmin, Task, TaskRequest, User, UserRequest } from 'features/types';
+import { Location, LocationRequest, Schedule, ScheduleAdmin, ScheduleRequest, Task, TaskRequest, User, UserRequest } from 'features/types';
 
 const baseUrl = process.env.REACT_APP_API_URL;
 
@@ -142,9 +142,32 @@ export const timetableApi = createApi({
                         { type: 'Schedules', id: 'ScheduleLIST' }
                     ] : [{ type: 'Schedules', id: 'ScheduleLIST' }]
         }),
+        addSchedule: build.mutation<ScheduleRequest, Partial<ScheduleRequest>>({
+            query: (body) => ({
+                url: '/schedules',
+                method: 'POST',
+                body
+            }),
+            invalidatesTags: [{ type: 'Schedules', id: 'ScheduleLIST' }]
+        }),
         getSchedule: build.query<Schedule, string | undefined>({
             query: (id) => id ? `/schedules/${id}` : '/schedules/204',
             providesTags: (result, error, id) => [{ type: 'Schedules', id }]
+        }),
+        updateSchedule: build.mutation<ScheduleRequest, Partial<ScheduleRequest>>({
+            query: ({ id, ...patch }) => ({
+                url: `/schedules/${id}`,
+                method: 'PATCH',
+                body: patch
+            }),
+            invalidatesTags: (result, error, { id }) => [{ type: 'Schedules', id }]
+        }),
+        deleteSchedule: build.mutation<{ message: string }, string>({
+            query: (id) => ({
+                url: `/schedules/${id}`,
+                method: 'DELETE'
+            }),
+            invalidatesTags: (result, error, id) => [{ type: 'Schedules', id }]
         }),
     })
 });
@@ -152,7 +175,7 @@ export const timetableApi = createApi({
 export const {
     useGetAccountsQuery, useAddAccountMutation, useGetAccountQuery, useUpdateAccountMutation, useDeleteAccountMutation,
     useGetLocationsQuery, useAddLocationMutation, useGetLocationQuery, useUpdateLocationMutation, useDeleteLocationMutation,
-    useGetSchedulesQuery, useGetScheduleQuery,
+    useGetSchedulesQuery, useAddScheduleMutation, useGetScheduleQuery, useUpdateScheduleMutation, useDeleteScheduleMutation,
     useGetTasksQuery, useAddTaskMutation, useGetTaskQuery, useUpdateTaskMutation, useDeleteTaskMutation,
 } = timetableApi
 

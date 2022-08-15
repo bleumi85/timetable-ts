@@ -41,7 +41,9 @@ interface ITaskRequest extends Omit<ITask, 'id'>, Partial<Pick<ITask, 'id'>> { }
 
 interface ILocationRequest extends Omit<ILocation, 'id'>, Partial<Pick<ILocation, 'id'>> { }
 
-interface IScheduleRequest extends Omit<ISchedule, 'id'>, Partial<Pick<ISchedule, 'id'>> { }
+interface IScheduleRequest extends Omit<ISchedule, 'id'>, Partial<Pick<ISchedule, 'id'>> {
+    remark: string;
+}
 
 interface ISchedule {
     id: string;

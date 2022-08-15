@@ -69,7 +69,7 @@ export const AdminLocationsForm: React.FC = (): JSX.Element => {
     }
 
     return (
-        <Container maxW='container.md' bg='whiteAlpha.900' boxShadow='md' p={0}>
+        <Container maxW='container.sm' bg='whiteAlpha.900' boxShadow='md' p={0}>
             <Heading size='md' bg='secondary.500' color='white' px={4} py={2}>Ort {isAddMode ? 'anlegen' : 'bearbeiten'}</Heading>
             <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
                 {({ errors, touched, isSubmitting, values, setFieldValue, handleChange }) => (
@@ -80,13 +80,14 @@ export const AdminLocationsForm: React.FC = (): JSX.Element => {
                                     <ColorPicker
                                         color={values.color}
                                         onChange={(newColor) => setFieldValue('color', newColor)}
-                                        style={{ maxHeight: '100px' }}
+                                        style={{ maxHeight: '160px' }}
                                     />
                                 </section>
                             </GridItem>
                             <GridItem colSpan={3}>
                                 <Input
                                     name='title'
+                                    label='Bezeichnung'
                                     value={values.title}
                                     onChange={handleChange}
                                 />
@@ -94,6 +95,7 @@ export const AdminLocationsForm: React.FC = (): JSX.Element => {
                             <GridItem colSpan={3}>
                                 <Select
                                     name='accountId'
+                                    label='Account'
                                     value={values.accountId}
                                     onChange={handleChange}
                                     options={accountOptions}

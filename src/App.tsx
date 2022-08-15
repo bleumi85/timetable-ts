@@ -8,6 +8,7 @@ import { AdminAccounts, AdminAccountsForm } from 'features/admin/accounts';
 import { AdminLocations, AdminLocationsForm } from 'features/admin/locations';
 import { AdminSchedules, AdminSchedulesForm } from 'features/admin/schedules';
 import { AdminTasks, AdminTasksForm } from 'features/admin/tasks';
+import { UserLocations, UserLocationsForm } from 'features/timetable/locations';
 import { UserRoles } from 'features/types';
 import { history } from 'helpers';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -90,6 +91,12 @@ const App: React.FC = (): JSX.Element => {
                             <Route path='edit/:id' element={<AdminTasksForm />} />
                             <Route path='*' element={<Navigate to='/admin/locations' />} />
                         </Route>
+                    </Route>
+                    <Route path='locations'>
+                        <Route index element={<UserLocations />} />
+                        <Route path='add' element={<UserLocationsForm authUser={authUser} />} />
+                        <Route path='edit/:id' element={<UserLocationsForm authUser={authUser} />} />
+                        <Route path='*' element={<Navigate to='/locations' />} />
                     </Route>
                     {/* <Route path='*' element={<Navigate to='/404' />} /> */}
                 </Routes>
