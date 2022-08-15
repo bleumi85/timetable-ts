@@ -1,6 +1,6 @@
 import { Container } from '@chakra-ui/react';
 import { useAppDispatch, useAppSelector } from 'app/hooks';
-import { Nav, PrivateRoute } from 'components';
+import { Nav, Page404, PrivateRoute } from 'components';
 import { Login, Profile } from 'features/account';
 import { authActions } from 'features/account/authSlice';
 import { Admin, AdminMain } from 'features/admin';
@@ -40,7 +40,7 @@ const App: React.FC = (): JSX.Element => {
     return (
         <>
             <Nav authUser={authUser} showAdmin={showAdmin} logOut={logOut} />
-            <Container maxW='container.2xl' display='flex' justifyContent='center' p={4} border='3px solid tomato'>
+            <Container maxW='container.2xl' display='flex' justifyContent='center' p={history.location?.pathname === '/404' ? 0 : 4}>
                 <Routes>
                     <Route
                         path='/'
@@ -48,7 +48,7 @@ const App: React.FC = (): JSX.Element => {
                     />
                     <Route
                         path='404'
-                        element={<div>Diese Seite existiert nicht</div>}
+                        element={<Page404 />}
                     />
                     <Route path='account'>
                         <Route
@@ -98,7 +98,7 @@ const App: React.FC = (): JSX.Element => {
                         <Route path='edit/:id' element={<UserLocationsForm authUser={authUser} />} />
                         <Route path='*' element={<Navigate to='/locations' />} />
                     </Route>
-                    {/* <Route path='*' element={<Navigate to='/404' />} /> */}
+                    <Route path='*' element={<Navigate to='/404' />} />
                 </Routes>
             </Container>
         </>

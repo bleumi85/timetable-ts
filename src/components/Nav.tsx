@@ -1,6 +1,7 @@
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import { Box, BoxProps, Flex, Stack, TextProps, useDisclosure } from '@chakra-ui/react';
 import { User } from 'features/types';
+import { history } from 'helpers';
 import React from 'react';
 import { FcAlarmClock } from 'react-icons/fc';
 import { Link, NavLink } from 'react-router-dom';
@@ -30,6 +31,12 @@ const adminLinks: LinkProps[] = [
 export const Nav: React.FC<NavProps> = (props): JSX.Element => {
     const { authUser, showAdmin, logOut } = props;
     const { isOpen, onToggle } = useDisclosure();
+
+    const x = history.location;
+    console.log(x?.pathname)
+
+    if (history.location && history.location.pathname === '/404')
+        return <></>;
 
     return (
         <NavBarContainer>
