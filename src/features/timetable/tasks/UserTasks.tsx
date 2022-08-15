@@ -2,13 +2,13 @@ import { Box, Button, Center, Progress, Stack, useToast } from '@chakra-ui/react
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useTable } from 'components';
 import { ApiAlert } from 'components/controls';
-import { Location } from 'features/types';
+import { Task } from 'features/types';
 import React, { useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { getErrorMessage, useDeleteLocationMutation, useGetLocationsQuery } from '../timetableApi';
+import { getErrorMessage, useDeleteTaskMutation, useGetTasksQuery } from '../timetableApi';
 
-export const UserLocations: React.FC = (): JSX.Element => {
-    let { data: locations = [], isLoading, error } = useGetLocationsQuery();
+export const UserTasks: React.FC = (): JSX.Element => {
+    let { data: tasks = [], isLoading, error } = useGetTasksQuery();
 
     if (isLoading)
         return <Progress w='100%' isIndeterminate colorScheme='primary' />
@@ -16,23 +16,22 @@ export const UserLocations: React.FC = (): JSX.Element => {
     if (error)
         return <ApiAlert error={error} />
 
-    const sortedLocations = [...locations].sort((a, b) => a.title.localeCompare(b.title));
-    locations = sortedLocations;
+    const sortedTasks = [...tasks].sort((a, b) => a.title.localeCompare(b.title));
 
-    return <FormattedTable data={locations} />
+    return <FormattedTable data={sortedTasks} />
 }
 
-const FormattedTable: React.FC<{ data: Location[] }> = (props): JSX.Element => {
+const FormattedTable: React.FC<{ data: Task[] }> = (props): JSX.Element => {
     const { data } = props;
 
     const toast = useToast();
-    const [deleteLocation, { isLoading: isDeleting }] = useDeleteLocationMutation();
+    const [deleteTask, { isLoading: isDeleting }] = useDeleteTaskMutation();
 
     const onDelete = useCallback(async (id: string) => {
         try {
-            await deleteLocation(id).unwrap();
+            await deleteTask(id).unwrap();
             toast({
-                title: 'Ort erfolgreich gelöscht',
+                title: 'Tätigkeit erfolgreich gelöscht',
                 status: 'success',
                 duration: 2000,
                 isClosable: true
@@ -47,18 +46,18 @@ const FormattedTable: React.FC<{ data: Location[] }> = (props): JSX.Element => {
                 isClosable: true
             })
         }
-    }, [deleteLocation, toast]);
+    }, [deleteTask, toast]);
 
-    const columnHelper = createColumnHelper<Location>();
+    const columnHelper = createColumnHelper<Task>();
 
-    const columns = useMemo<ColumnDef<Location, any>[]>(() => [
+    const columns = useMemo<ColumnDef<Task, any>[]>(() => [
         columnHelper.accessor('color', {
             header: () => <Center>Farbe</Center>,
             cell: info => {
                 return info.getValue() && <Center><Box w="8" h="8" borderRadius='md' bg={info.getValue()} /></Center>
             }
         }),
-        columnHelper.accessor('title', { header: 'Title' }),
+        columnHelper.accessor('title', { header: 'Titel' }),
         columnHelper.accessor(row => row, {
             id: 'actions',
             header: '',
@@ -77,7 +76,7 @@ const FormattedTable: React.FC<{ data: Location[] }> = (props): JSX.Element => {
 
     const {
         TblFilter, TblContainer, TblHead, TblBody, TblPagination
-    } = useTable<Location>(data, columns, false);
+    } = useTable<Task>(data, columns, false);
 
     return (
         <Stack direction='column' maxW='container.md' spacing={4} p={2} w='100%'>
