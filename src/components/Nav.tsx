@@ -32,9 +32,6 @@ export const Nav: React.FC<NavProps> = (props): JSX.Element => {
     const { authUser, showAdmin, logOut } = props;
     const { isOpen, onToggle } = useDisclosure();
 
-    const x = history.location;
-    console.log(x?.pathname)
-
     if (history.location && history.location.pathname === '/404')
         return <></>;
 
@@ -61,8 +58,9 @@ const NavBarContainer: React.FC<{ children: React.ReactElement | React.ReactElem
         wrap='wrap'
         w='100%'
         p={4}
-        bg={['primary.500', 'primary.500', 'transparent', 'transparent']}
+        bg={['primary.500', 'primary.500', 'whiteAlpha.900', 'whiteAlpha.900']}
         color={['white', 'white', 'primary.700', 'primary.700']}
+        boxShadow='md'
     >
         {props.children}
     </Flex>

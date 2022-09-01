@@ -41,7 +41,7 @@ export const Login: React.FC = (): JSX.Element => {
                     <Spacer />
                     <Box minW={{ base: '90%', md: '500px' }}>
                         <Formik
-                            initialValues={{ email: 'jens.bleumer@gmail.com', password: 'bleumi' }}
+                            initialValues={{ email: '', password: '' }}
                             onSubmit={(values: LoginData) => {
                                 return dispatch(authActions.login(values))
                             }}

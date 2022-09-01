@@ -36,7 +36,7 @@ export const UserTasksForm: React.FC<{ authUser: User | undefined }> = (props): 
     const onSubmit = async (values: TaskRequest, { setSubmitting }: FormikHelpers<TaskRequest>) => {
         try {
             isAddMode ? await addLocation(values) : await updateLocation({ ...values, id })
-            history.navigate && history.navigate('/locations');
+            history.navigate && history.navigate('/tasks');
         } catch (err) {
             const errMsg = getErrorMessage(err);
             toast({

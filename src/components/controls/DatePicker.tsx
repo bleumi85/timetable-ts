@@ -22,21 +22,26 @@ const customDateInput = ({ value, onClick, onChange }: any, ref: any) => (
 
 const CustomInput = forwardRef(customDateInput);
 
-interface DatePickerProps extends ReactDatePickerProps {
+interface DatePickerProps extends Partial<ReactDatePickerProps> {
     name: string;
     label?: string;
+    onChange: (newDate: Date | null) => void;
     error?: FormikErrors<Date>
 }
 
 export const DatePicker: React.FC<DatePickerProps> = (props): JSX.Element => {
     const { name, label, error, showPopperArrow = false, onChange, ...rest } = props;
 
+    let json = JSON.stringify(error);
+    let errMsg = json?.replace(/"/g, "");
+
     return (
         <FormControl isInvalid={!!error}>
             {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
-            <InputGroup className='dark-theme'>
+            <InputGroup /* className='dark-theme' */>
                 <ReactDatePicker
                     id={name}
+                    name={name}
                     onChange={onChange}
                     showPopperArrow={showPopperArrow}
                     timeInputLabel="Zeit:"
@@ -50,7 +55,7 @@ export const DatePicker: React.FC<DatePickerProps> = (props): JSX.Element => {
                 <InputRightElement color='gray.500' children={<CalendarIcon fontSize='sm' />} />
             </InputGroup>
             {error && (
-                <FormErrorMessage>{JSON.stringify(error)}</FormErrorMessage>
+                <FormErrorMessage>{errMsg}</FormErrorMessage>
             )}
         </FormControl>
     )

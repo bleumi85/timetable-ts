@@ -53,14 +53,16 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
     const columnHelper = createColumnHelper<ScheduleAdmin>();
 
     const columns = useMemo<ColumnDef<ScheduleAdmin, any>[]>(() => [
-        columnHelper.accessor('isTransferred', {
+        columnHelper.accessor(row => {
+            return row.isTransferred ? 'JA' : 'NEIN'
+        }, {
+            id: 'isTransferred',
             header: '',
-            enableColumnFilter: false,
             enableSorting: false,
             cell: info => {
-                const isTransferred = info.getValue() as boolean;
+                const isTransferred = info.getValue();
                 return <Center>
-                    {isTransferred ? <EmailIcon color='green.500' fontSize='1.25rem' /> : null}
+                    {isTransferred === 'JA' ? <EmailIcon color='green.500' fontSize='1.25rem' /> : null}
                 </Center>
             }
         }),
@@ -126,17 +128,12 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
 
     const {
         TblFilter, TblContainer, TblHead, TblBody, TblPagination
-    } = useTable<ScheduleAdmin>(data, columns);
+    } = useTable<ScheduleAdmin>(data, columns, true, [{ id: 'isTransferred', value: 'NEIN' }], true);
 
     return (
-        <Stack direction='column' maxW='container.xl' spacing={4} p={2} w='100%' border='2px solid tomato'>
+        <Stack direction='column' maxW='container.xl' spacing={4} p={2} w='100%'>
             <TblFilter />
             <TblContainer>
-                {/* <colgroup>
-                    <col width='10%' />
-                    <col width='40%' />
-                    <col width='50%' />
-                </colgroup> */}
                 <TblHead />
                 <TblBody />
             </TblContainer>

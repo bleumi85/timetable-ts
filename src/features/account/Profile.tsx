@@ -1,3 +1,4 @@
+import { Box, Heading } from '@chakra-ui/react';
 import { User } from 'features/types';
 import React from 'react';
 
@@ -6,9 +7,11 @@ type ProfileProps = {
 }
 
 export const Profile: React.FC<ProfileProps> = (props): JSX.Element => {
-    // const { authUser } = props;
+    const { authUser } = props;
 
     return (
-        <div>Profile Page</div>
+        <Box>
+            <Heading>Hallo {authUser?.firstName}</Heading>
+        </Box>
     )
 }

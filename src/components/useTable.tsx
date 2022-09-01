@@ -9,6 +9,9 @@ import {
 } from '@chakra-ui/icons';
 import {
     Button,
+    Center,
+    Checkbox,
+    CheckboxProps,
     Flex,
     IconButton,
     NumberDecrementStepper,
@@ -39,21 +42,58 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    RowSelectionState,
+    TableState,
     useReactTable
 } from '@tanstack/react-table';
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export function useTable<T>(data: T[], columns: ColumnDef<T, any>[], enableColumnFilters: boolean = true) {
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+export function useTable<T>(data: T[], columns: ColumnDef<T, any>[], enableColumnFilters: boolean = true, initialColumnFilters: ColumnFiltersState = [], selectable: boolean = false) {
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(initialColumnFilters);
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+    const myColumns = useMemo<ColumnDef<T>[]>(
+        () => [
+            {
+                id: 'select',
+                header: ({ table }) => (
+                    <Center>
+                        <IndeterminateCheckbox
+                            isChecked={table.getIsAllRowsSelected()}
+                            isIndeterminate={table.getIsSomeRowsSelected()}
+                            onChange={table.getToggleAllRowsSelectedHandler()}
+                            colorScheme='white'
+                        />
+                    </Center>
+                ),
+                cell: ({ row }) => (
+                    <Center>
+                        <IndeterminateCheckbox
+                            isChecked={row.getIsSelected()}
+                            isIndeterminate={row.getIsSomeSelected()}
+                            onChange={row.getToggleSelectedHandler()}
+                            borderColor='secondary.500'
+                            colorScheme='secondary'
+                        />
+                    </Center>
+                ),
+                enableSorting: false,
+                enableColumnFilter: false
+            },
+            ...columns
+        ], [columns]
+    )
 
     const table = useReactTable({
         data,
-        columns,
+        columns: selectable ? myColumns : columns,
         state: {
             columnFilters,
+            rowSelection,
         },
         onColumnFiltersChange: setColumnFilters,
+        onRowSelectionChange: setRowSelection,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -67,8 +107,9 @@ export function useTable<T>(data: T[], columns: ColumnDef<T, any>[], enableColum
     });
 
     const onReset = () => {
-        table.setColumnFilters([]);
+        table.setColumnFilters(initialColumnFilters);
         table.setSorting([]);
+        table.setRowSelection({});
         table.setPagination({
             pageIndex: 0,
             pageSize: 10
@@ -251,8 +292,21 @@ export function useTable<T>(data: T[], columns: ColumnDef<T, any>[], enableColum
         </Flex>
     );
 
+    const TblJson = (): JSX.Element => {
+        const state: TableState = table.getState();
+        const data = {
+            'columnFilters': state.columnFilters,
+            'sorting': state.sorting,
+            'pagination': state.pagination,
+            'rowSelection': state.rowSelection
+        }
+        return (
+            <pre>{JSON.stringify(data, null, 2)}</pre>
+        )
+    }
+
     return {
-        TblFilter, TblContainer, TblHead, TblBody, TblPagination
+        TblFilter, TblContainer, TblHead, TblBody, TblPagination, TblJson
     }
 };
 
@@ -260,13 +314,14 @@ function Filter({ column }: { column: Column<any, unknown> }): JSX.Element {
     const columnFilterValue = column.getFilterValue();
 
     const sortedUniqueValues = useMemo(() => Array.from(column.getFacetedUniqueValues().keys()).sort(), [column]);
+    const heading = column.columnDef.header === '' ? 'Suche' : column.columnDef.header;
 
     return (
         <>
             <Select
                 borderColor='secondary.500'
                 maxW='300px'
-                placeholder={`Suche... (${column.getFacetedUniqueValues().size})`}
+                placeholder={`${heading}... (${column.getFacetedUniqueValues().size})`}
                 value={(columnFilterValue ?? '') as string}
                 onChange={(e) => column.setFilterValue(e.target.value)}
             >
@@ -275,5 +330,25 @@ function Filter({ column }: { column: Column<any, unknown> }): JSX.Element {
                 ))}
             </Select>
         </>
+    )
+}
+
+function IndeterminateCheckbox(props: CheckboxProps) {
+    const ref = React.useRef<HTMLInputElement>(null!);
+    const { isIndeterminate, isChecked, ...rest } = props;
+
+    React.useEffect(() => {
+        if (typeof isIndeterminate === 'boolean') {
+            ref.current.indeterminate = !rest.checked && isIndeterminate
+        }
+    }, [ref, isIndeterminate, rest.checked])
+
+    return (
+        <Checkbox
+            isChecked={isChecked}
+            isIndeterminate={isIndeterminate}
+            ref={ref}
+            {...rest}
+        />
     )
 }
