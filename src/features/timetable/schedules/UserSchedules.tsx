@@ -1,11 +1,12 @@
-import { EmailIcon, InfoIcon } from '@chakra-ui/icons';
+import { AttachmentIcon, InfoIcon } from '@chakra-ui/icons';
 import { Button, Center, IconButton, Progress, Stack, Text, Tooltip, useToast } from '@chakra-ui/react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { useTable } from 'components';
+import { dateFormat } from 'app/settings';
+import { DeleteConfirmation, useTable } from 'components';
 import { ApiAlert } from 'components/controls';
 import { ScheduleAdmin } from 'features/types';
 import moment from 'moment';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { MdOutlinePictureAsPdf } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import { getErrorMessage, useDeleteScheduleMutation, useGetSchedulesQuery } from '../timetableApi';
@@ -30,11 +31,25 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
     const toast = useToast();
     const [deleteSchedule, { isLoading: isDeleting }] = useDeleteScheduleMutation();
 
-    const onDelete = useCallback(async (id: string) => {
+    const [id, setId] = useState('');
+    const [displayConfirmationModal, setDisplayConfirmationModal] = useState(false);
+    const [deleteMessage, setDeleteMessage] = useState('');
+
+    const showDeleteModal = useCallback(async (id: string, title: string) => {
+        setId(id);
+        setDeleteMessage(title);
+        setDisplayConfirmationModal(true);
+    }, []);
+
+    const hideConfirmationModal = () => {
+        setDisplayConfirmationModal(false);
+    }
+
+    const submitDelete = async (id: string) => {
         try {
             await deleteSchedule(id).unwrap();
             toast({
-                title: 'Ort erfolgreich gelöscht',
+                title: 'Tätigkeit erfolgreich gelöscht',
                 status: 'success',
                 duration: 2000,
                 isClosable: true
@@ -48,8 +63,10 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
                 duration: 4000,
                 isClosable: true
             })
+        } finally {
+            setDisplayConfirmationModal(false);
         }
-    }, [deleteSchedule, toast]);
+    }
 
     const columnHelper = createColumnHelper<ScheduleAdmin>();
 
@@ -63,7 +80,7 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
             cell: info => {
                 const isTransferred = info.getValue();
                 return <Center>
-                    {isTransferred === 'JA' ? <EmailIcon color='green.500' fontSize='1.25rem' /> : null}
+                    {isTransferred === 'JA' ? <AttachmentIcon color='green.500' fontSize='1.25rem' /> : null}
                 </Center>
             }
         }),
@@ -84,7 +101,7 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
         }),
         columnHelper.accessor('timeFrom', {
             header: 'Datum',
-            cell: info => new Date(info.getValue()).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' }),
+            cell: info => new Date(info.getValue()).toLocaleDateString('de-DE', dateFormat),
             enableColumnFilter: false
         }),
         columnHelper.accessor(row => {
@@ -115,17 +132,18 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
             id: 'actions',
             header: '',
             cell: info => {
-                const { id, isTransferred } = info.getValue();
+                const { id, isTransferred, timeFrom, task } = info.getValue();
+                let message = 'Möchtest du ' + task.title + ' am ' + new Date(timeFrom).toLocaleDateString('de-DE', dateFormat) + ' wirklich löschen?'
                 return (
                     <Center>
                         <Link to={`edit/${id}`}><Button size='sm' colorScheme='secondary' disabled={isTransferred}>Bearbeiten</Button></Link>
-                        <Button size='sm' ml={4} colorScheme='red' disabled={isTransferred || isDeleting} onClick={() => onDelete(id)}>Löschen</Button>
+                        <Button size='sm' ml={4} colorScheme='red' disabled={isTransferred || isDeleting} onClick={() => showDeleteModal(id, message)}>Löschen</Button>
                     </Center>
                 )
             },
             enableColumnFilter: false
         })
-    ], [columnHelper, isDeleting, onDelete])
+    ], [columnHelper, isDeleting, showDeleteModal])
 
     const {
         TblFilter, TblContainer, TblHead, TblBody, TblPagination, getSelectedRows
@@ -151,6 +169,13 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
                 </TblContainer>
                 <TblPagination />
             </Stack>
+            <DeleteConfirmation
+                id={id}
+                showModal={displayConfirmationModal}
+                confirmModal={submitDelete}
+                hideModal={hideConfirmationModal}
+                message={deleteMessage}
+            />
         </>
     )
 }
