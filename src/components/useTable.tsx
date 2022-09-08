@@ -42,6 +42,7 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    Row,
     RowSelectionState,
     TableState,
     useReactTable
@@ -116,7 +117,7 @@ export function useTable<T>(data: T[], columns: ColumnDef<T, any>[], enableColum
         });
     }
 
-    const TblFilter = (props: { children?: React.ReactElement }): JSX.Element => (
+    const TblFilter = (props: { children?: React.ReactElement | React.ReactElement[] }): JSX.Element => (
         <Stack direction='row' w='100%' spacing={4} justifyContent='flex-end'>
             <Stack direction='row' flexGrow={1} spacing={4}>
                 {table.getHeaderGroups().map(headerGroup => {
@@ -298,15 +299,17 @@ export function useTable<T>(data: T[], columns: ColumnDef<T, any>[], enableColum
             'columnFilters': state.columnFilters,
             'sorting': state.sorting,
             'pagination': state.pagination,
-            'rowSelection': state.rowSelection
+            'rowSelection': state.rowSelection,
         }
         return (
             <pre>{JSON.stringify(data, null, 2)}</pre>
         )
     }
 
+    const getSelectedRows: Row<T>[] = table.getSelectedRowModel().flatRows
+
     return {
-        TblFilter, TblContainer, TblHead, TblBody, TblPagination, TblJson
+        TblFilter, TblContainer, TblHead, TblBody, TblPagination, TblJson, getSelectedRows
     }
 };
 

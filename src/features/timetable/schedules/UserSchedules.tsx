@@ -1,11 +1,12 @@
 import { EmailIcon, InfoIcon } from '@chakra-ui/icons';
-import { Button, Center, Progress, Stack, Text, Tooltip, useToast } from '@chakra-ui/react';
+import { Button, Center, IconButton, Progress, Stack, Text, Tooltip, useToast } from '@chakra-ui/react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { useTable } from 'components';
 import { ApiAlert } from 'components/controls';
 import { ScheduleAdmin } from 'features/types';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { MdOutlinePictureAsPdf } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import { getErrorMessage, useDeleteScheduleMutation, useGetSchedulesQuery } from '../timetableApi';
 
@@ -127,17 +128,29 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
     ], [columnHelper, isDeleting, onDelete])
 
     const {
-        TblFilter, TblContainer, TblHead, TblBody, TblPagination
+        TblFilter, TblContainer, TblHead, TblBody, TblPagination, getSelectedRows
     } = useTable<ScheduleAdmin>(data, columns, true, [{ id: 'isTransferred', value: 'NEIN' }], true);
 
+    const selectedRows: ScheduleAdmin[] = getSelectedRows.map(row => row.original);
+
     return (
-        <Stack direction='column' maxW='container.xl' spacing={4} p={2} w='100%'>
-            <TblFilter />
-            <TblContainer>
-                <TblHead />
-                <TblBody />
-            </TblContainer>
-            <TblPagination />
-        </Stack>
+        <>
+            <Stack direction='column' maxW='container.xl' spacing={4} p={2} w='100%'>
+                <TblFilter>
+                    <Link to='pdf' state={{ data: selectedRows }}>
+                        <IconButton
+                            aria-label='create pdf'
+                            colorScheme='blue'
+                            icon={<MdOutlinePictureAsPdf fontSize='1.5rem' />}
+                        />
+                    </Link>
+                </TblFilter>
+                <TblContainer>
+                    <TblHead />
+                    <TblBody />
+                </TblContainer>
+                <TblPagination />
+            </Stack>
+        </>
     )
 }

@@ -9,7 +9,7 @@ import { AdminLocations, AdminLocationsForm } from 'features/admin/locations';
 import { AdminSchedules, AdminSchedulesForm } from 'features/admin/schedules';
 import { AdminTasks, AdminTasksForm } from 'features/admin/tasks';
 import { UserLocations, UserLocationsForm } from 'features/timetable/locations';
-import { UserSchedules, UserSchedulesForm } from 'features/timetable/schedules';
+import { UserSchedules, UserSchedulesForm, UserSchedulesPDF } from 'features/timetable/schedules';
 import { UserTasks, UserTasksForm } from 'features/timetable/tasks';
 import { UserRoles } from 'features/types';
 import { history } from 'helpers';
@@ -104,6 +104,7 @@ const App: React.FC = (): JSX.Element => {
                         <Route index element={<UserSchedules />} />
                         <Route path='add' element={<UserSchedulesForm authUser={authUser} />} />
                         <Route path='edit/:id' element={<UserSchedulesForm authUser={authUser} />} />
+                        <Route path='pdf' element={<UserSchedulesPDF />} />
                         <Route path='*' element={<Navigate to='/schedules' />} />
                     </Route>
                     <Route path='tasks'>
