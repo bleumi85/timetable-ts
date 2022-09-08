@@ -1,9 +1,9 @@
 import { Box, Button, Center, Progress, Stack, useToast } from '@chakra-ui/react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { useTable } from 'components';
+import { DeleteConfirmation, useTable } from 'components';
 import { ApiAlert } from 'components/controls';
 import { Task } from 'features/types';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getErrorMessage, useDeleteTaskMutation, useGetTasksQuery } from '../timetableApi';
 
@@ -27,7 +27,21 @@ const FormattedTable: React.FC<{ data: Task[] }> = (props): JSX.Element => {
     const toast = useToast();
     const [deleteTask, { isLoading: isDeleting }] = useDeleteTaskMutation();
 
-    const onDelete = useCallback(async (id: string) => {
+    const [id, setId] = useState('');
+    const [displayConfirmationModal, setDisplayConfirmationModal] = useState(false);
+    const [deleteMessage, setDeleteMessage] = useState('');
+
+    const showDeleteModal = useCallback(async (id: string, message: string) => {
+        setId(id);
+        setDeleteMessage(message);
+        setDisplayConfirmationModal(true);
+    }, []);
+
+    const hideConfirmationModal = () => {
+        setDisplayConfirmationModal(false);
+    };
+
+    const submitDelete = async (id: string) => {
         try {
             await deleteTask(id).unwrap();
             toast({
@@ -45,8 +59,10 @@ const FormattedTable: React.FC<{ data: Task[] }> = (props): JSX.Element => {
                 duration: 4000,
                 isClosable: true
             })
+        } finally {
+            setDisplayConfirmationModal(false);
         }
-    }, [deleteTask, toast]);
+    }
 
     const columnHelper = createColumnHelper<Task>();
 
@@ -62,35 +78,45 @@ const FormattedTable: React.FC<{ data: Task[] }> = (props): JSX.Element => {
             id: 'actions',
             header: '',
             cell: info => {
-                const { id, schedulesCount } = info.getValue();
+                const { id, schedulesCount, title } = info.getValue();
+                let message = "Möchtest du die Tätigkeit '" + title + "' wirklich löschen?"
                 const disabled = schedulesCount > 0;
                 return (
                     <Center>
                         <Link to={`edit/${id}`}><Button size='sm' colorScheme='secondary'>Bearbeiten</Button></Link>
-                        <Button size='sm' ml={4} colorScheme='red' onClick={() => onDelete(id)} disabled={isDeleting || disabled}>Löschen</Button>
+                        <Button size='sm' ml={4} colorScheme='red' onClick={() => showDeleteModal(id, message)} disabled={isDeleting || disabled}>Löschen</Button>
                     </Center>
                 )
             }
         }),
-    ], [columnHelper, isDeleting, onDelete]);
+    ], [columnHelper, isDeleting, showDeleteModal]);
 
     const {
         TblFilter, TblContainer, TblHead, TblBody, TblPagination
     } = useTable<Task>(data, columns, false);
 
     return (
-        <Stack direction='column' maxW='container.md' spacing={4} p={2} w='100%'>
-            <TblFilter />
-            <TblContainer>
-                <colgroup>
-                    <col width='10%' />
-                    <col width='40%' />
-                    <col width='50%' />
-                </colgroup>
-                <TblHead />
-                <TblBody />
-            </TblContainer>
-            <TblPagination />
-        </Stack>
+        <>
+            <Stack direction='column' maxW='container.md' spacing={4} p={2} w='100%'>
+                <TblFilter />
+                <TblContainer>
+                    <colgroup>
+                        <col width='10%' />
+                        <col width='40%' />
+                        <col width='50%' />
+                    </colgroup>
+                    <TblHead />
+                    <TblBody />
+                </TblContainer>
+                <TblPagination />
+            </Stack>
+            <DeleteConfirmation
+                id={id}
+                showModal={displayConfirmationModal}
+                confirmModal={submitDelete}
+                hideModal={hideConfirmationModal}
+                message={deleteMessage}
+            />
+        </>
     )
 }

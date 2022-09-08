@@ -1,3 +1,4 @@
+export * from './DeleteConfirmation';
 export * from './Nav';
 export * from './Page404';
 export * from './PrivateRoute';
