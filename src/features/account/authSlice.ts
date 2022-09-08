@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import axios, { AxiosError } from 'axios';
 import { AuthState, LoginData, User } from 'features/types';
 import { history } from 'helpers';
@@ -55,13 +55,20 @@ function createInitialState(): AuthState {
 
 function createReducers() {
     return {
-        logout
+        logout,
+        refreshToken
     }
 
     function logout(state: AuthState) {
         state.user = undefined;
         TokenService.removeUser();
         history.navigate && history.navigate('/account/login')
+    }
+
+    function refreshToken(state: AuthState, action: PayloadAction<User>) {
+        if (state.user) {
+            state.user.jwtToken = action.payload.jwtToken
+        }
     }
 }
 

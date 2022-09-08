@@ -1,24 +1,52 @@
-import { createApi, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { RootState } from 'app/store';
+import { authActions } from 'features/account/authSlice';
 import { Location, LocationRequest, Schedule, ScheduleAdmin, ScheduleRequest, Task, TaskRequest, User, UserRequest } from 'features/types';
 
 const baseUrl = process.env.REACT_APP_API_URL;
 
+const baseQuery = fetchBaseQuery({
+    baseUrl,
+    prepareHeaders(headers, { getState }) {
+        const token = (getState() as RootState).auth.user?.jwtToken;
+
+        // If we have a token set in state, let's assume that we should be passing it.
+        if (token) {
+            headers.set('authorization', `Bearer ${token}`)
+        }
+
+        return headers;
+    },
+    credentials: 'include'
+});
+
+const baseQueryWithReauth: BaseQueryFn<
+    string | FetchArgs,
+    unknown,
+    FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+    let result = await baseQuery(args, api, extraOptions);
+    if (result.error && result.error.status === 401) {
+        // try to get a new token
+        const refreshResult = await baseQuery({
+            url: '/accounts/refresh-token',
+            method: 'post'
+        }, api, extraOptions);
+        if (refreshResult.data) {
+            // store the new token
+            api.dispatch(authActions.refreshToken(refreshResult.data as User));
+            // retry the initial query
+            result = await baseQuery(args, api, extraOptions);
+        } else {
+            api.dispatch(authActions.logout())
+        }
+    }
+    return result;
+}
+
 export const timetableApi = createApi({
     reducerPath: 'timetableApi',
-    baseQuery: fetchBaseQuery({
-        baseUrl,
-        prepareHeaders(headers, { getState }) {
-            const token = (getState() as RootState).auth.user?.jwtToken;
-
-            // If we have a token set in state, let's assume that we should be passing it.
-            if (token) {
-                headers.set('authorization', `Bearer ${token}`)
-            }
-
-            return headers;
-        }
-    }),
+    baseQuery: baseQueryWithReauth,
     tagTypes: ['Accounts', 'Locations', 'Schedules', 'Tasks'],
     endpoints: (build) => ({
         // Accounts
