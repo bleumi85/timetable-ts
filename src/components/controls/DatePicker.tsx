@@ -50,6 +50,7 @@ export const DatePicker: React.FC<DatePickerProps> = (props): JSX.Element => {
                     locale='de'
                     dateFormat='EEEE d. MMMM yyyy HH:mm'
                     customInput={<CustomInput />}
+                    shouldCloseOnSelect={false}
                     {...rest}
                 />
                 <InputRightElement color='gray.500' children={<CalendarIcon fontSize='sm' />} />
