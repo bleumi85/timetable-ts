@@ -182,6 +182,14 @@ export const timetableApi = createApi({
             query: (id) => id ? `/schedules/${id}` : '/schedules/204',
             providesTags: (result, error, id) => [{ type: 'Schedules', id }]
         }),
+        updateSchedulesPDF: build.mutation<string[], string[]>({
+            query: (body) => ({
+                url: '/schedules/pdfStatus',
+                method: 'PATCH',
+                body
+            }),
+            invalidatesTags: () => [{ type: 'Schedules', id: 'ScheduleLIST' }]
+        }),
         updateSchedule: build.mutation<ScheduleRequest, Partial<ScheduleRequest>>({
             query: ({ id, ...patch }) => ({
                 url: `/schedules/${id}`,
@@ -203,7 +211,7 @@ export const timetableApi = createApi({
 export const {
     useGetAccountsQuery, useAddAccountMutation, useGetAccountQuery, useUpdateAccountMutation, useDeleteAccountMutation,
     useGetLocationsQuery, useAddLocationMutation, useGetLocationQuery, useUpdateLocationMutation, useDeleteLocationMutation,
-    useGetSchedulesQuery, useAddScheduleMutation, useGetScheduleQuery, useUpdateScheduleMutation, useDeleteScheduleMutation,
+    useGetSchedulesQuery, useAddScheduleMutation, useGetScheduleQuery, useUpdateScheduleMutation, useUpdateSchedulesPDFMutation, useDeleteScheduleMutation,
     useGetTasksQuery, useAddTaskMutation, useGetTaskQuery, useUpdateTaskMutation, useDeleteTaskMutation,
 } = timetableApi
 

@@ -35,3 +35,37 @@ export const DeleteConfirmation: React.FC<DeleteConfirmationType> = (props): JSX
         </Modal>
     )
 }
+
+type SimpleConfirmationType = {
+    isOpen: boolean;
+    onConfirm: () => void;
+    onClose: () => void;
+    header: string;
+    message: string;
+}
+
+export const SimpleConfirmation: React.FC<SimpleConfirmationType> = (props): JSX.Element => {
+    const { isOpen, onConfirm, onClose, header, message } = props;
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent>
+                <ModalHeader>{header}</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                    <Alert status='info'>
+                        <AlertIcon />
+                        <AlertDescription>{message}</AlertDescription>
+                    </Alert>
+                </ModalBody>
+                <ModalFooter>
+                    <Button colorScheme='gray' mr={3} variant='outline' onClick={onClose}>
+                        Abbrechen
+                    </Button>
+                    <Button colorScheme='blue' onClick={() => onConfirm()}>Ok</Button>
+                </ModalFooter>
+            </ModalContent>
+        </Modal>
+    )
+}

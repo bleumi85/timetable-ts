@@ -55,7 +55,7 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
         try {
             await deleteSchedule(id).unwrap();
             toast({
-                title: 'Tätigkeit erfolgreich gelöscht',
+                title: 'Buchung erfolgreich gelöscht',
                 status: 'success',
                 duration: 2000,
                 isClosable: true
@@ -161,13 +161,6 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
         <>
             <Stack direction='column' maxW='container.xl' spacing={4} p={2} w='100%'>
                 <TblFilter>
-                    {/* <Link to='pdf' state={{ rows: data, selectedRows }}>
-                        <IconButton
-                            aria-label='create pdf'
-                            colorScheme='blue'
-                            icon={<MdOutlinePictureAsPdf fontSize='1.5rem' />}
-                        />
-                    </Link> */}
                     <Menu>
                         <MenuButton
                             as={IconButton}

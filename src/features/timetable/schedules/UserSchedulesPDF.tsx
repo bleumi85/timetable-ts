@@ -1,13 +1,17 @@
-import { Box, Button, Stack, useToast } from '@chakra-ui/react';
-import { Document, Font, Page, PDFDownloadLink, PDFViewer, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { Box, Button, Stack, useDisclosure, useToast } from '@chakra-ui/react';
+import { Document, Page, PDFViewer, StyleSheet, Text, usePDF, View } from '@react-pdf/renderer';
+import { SimpleConfirmation } from 'components';
 import { Location, ScheduleAdmin } from 'features/types';
 import { groupBy, history } from 'helpers';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { getErrorMessage, useUpdateSchedulesPDFMutation } from '../timetableApi';
 
 export const UserSchedulesPDF: React.FC = (): JSX.Element => {
     const toast = useToast();
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [updateSchedules] = useUpdateSchedulesPDFMutation();
 
     const { rows, selectedRows, location } = history?.location?.state as {
         rows: ScheduleAdmin[],
@@ -25,6 +29,33 @@ export const UserSchedulesPDF: React.FC = (): JSX.Element => {
         }
     }, [location.id, rows, selectedRows]);
 
+    const [instance] = usePDF({ document: <MyDocument data={data} showAllDates={location.showCompleteMonth} /> });
+
+    const submitDownload = async () => {
+        try {
+            if (instance.url) {
+                let alink = document.createElement('a');
+                alink.href = instance.url;
+                alink.download = 'Testdatei.pdf';
+                alink.click();
+            }
+            const ids = data.map(value => value.id);
+            await updateSchedules(ids).unwrap();
+            history.navigate && history.navigate('/schedules');
+        } catch (err) {
+            const errMsg = getErrorMessage(err);
+            toast({
+                title: 'PDF konnte nicht erstellt werden',
+                description: errMsg,
+                status: 'error',
+                duration: 4000,
+                isClosable: true
+            })
+        } finally {
+            onClose()
+        }
+    }
+
     const toastId = 'dataLengthToast';
     if (!data.length) {
         if (!toast.isActive(toastId)) {
@@ -37,38 +68,40 @@ export const UserSchedulesPDF: React.FC = (): JSX.Element => {
                 isClosable: true
             });
         }
-        return (
-            <Navigate to='..' />
-        )
+        history.navigate && history.navigate('/schedules');
     }
 
-    const fileName = data[0].location.title.toLocaleLowerCase() + '_' + moment(data[0].timeFrom).format('YYYY_MM') + '.pdf';
+    // const fileName = data[0].location.title.toLocaleLowerCase() + '_' + moment(data[0].timeFrom).format('YYYY_MM') + '.pdf';
 
     return (
-        <Stack direction='row' w='100%' spacing={8}>
-            <Box w='100%' maxW={800} h='90vh' bg='tomato'>
-                <PDFViewer width='100%' height='100%' showToolbar={false}>
-                    <MyDocument data={data} showAllDates={location.showCompleteMonth} />
-                </PDFViewer>
-            </Box >
-            <Box h={100}>
-                <Stack direction='column' spacing={4}>
-                    <PDFDownloadLink document={<MyDocument data={data} showAllDates={location.showCompleteMonth} />} fileName={fileName}>
-                        {({ blob, url, loading, error }) => (loading ? 'Loading document...' : <Button colorScheme='purple' minW={200}>PDF erstellen</Button>)}
-                    </PDFDownloadLink>
-                    <Link to='..'>
-                        <Button colorScheme='red' minW={200}>Zurück</Button>
-                    </Link>
-                </Stack>
-            </Box>
-        </Stack>
+        <>
+            <Stack direction='row' w='100%' spacing={8}>
+                <Box w='100%' maxW={800} h='90vh' bg='tomato'>
+                    <PDFViewer width='100%' height='100%' showToolbar={false}>
+                        <MyDocument data={data} showAllDates={location.showCompleteMonth} />
+                    </PDFViewer>
+                </Box >
+                <Box h={100}>
+                    <Stack direction='column' spacing={4}>
+                        <Button colorScheme='blue' onClick={onOpen}>
+                            PDF erstellen
+                        </Button>
+                        <Link to='..'>
+                            <Button colorScheme='red' minW={200}>Zurück</Button>
+                        </Link>
+                    </Stack>
+                </Box>
+            </Stack>
+            <SimpleConfirmation
+                header='PDF Download bestätigen'
+                isOpen={isOpen}
+                onClose={onClose}
+                onConfirm={submitDownload}
+                message='1234'
+            />
+        </>
     )
 }
-
-Font.register({
-    family: 'Oswald',
-    src: 'https://fonts.gstatic.com/s/oswald/v13/Y_TKV6o8WovbUd3m_X9aAA.ttf'
-});
 
 // Create styles
 const styles = StyleSheet.create({
@@ -83,7 +116,6 @@ const styles = StyleSheet.create({
     },
     section: {
         margin: 8,
-        // border: '1px solid tomato'
     },
     heading: {
         fontSize: 20,
@@ -151,7 +183,6 @@ const tableStyles = StyleSheet.create({
         paddingBottom: 6,
         paddingLeft: 20,
         borderTop: '2px solid black'
-        // color: 'white'
     },
     // So Declarative and unDRY 👌
     row17: {
@@ -196,6 +227,7 @@ const ItemsTable: React.FC<ItemsTableProps> = (props): JSX.Element => {
         <>
             {Array.from(dataMap, ([key, values], index) => {
                 const valuesSorted = values.sort((a, b) => a.timeFrom.toString().localeCompare(b.timeFrom.toString()))
+                const valuesWithRemarks = values.filter(value => value.remark)
 
                 let duration = moment.duration('0')
                 values.forEach(d => {
@@ -231,29 +263,18 @@ const ItemsTable: React.FC<ItemsTableProps> = (props): JSX.Element => {
                                     <Text style={tableStyles.row17}>Dauer</Text>
                                     <Text style={tableStyles.row32}>Tätigkeit</Text>
                                 </View>
-                                {/* {valuesSorted.map((value) => {
-                                    const tFrom = new Date(value.timeFrom);
-                                    const tTo = new Date(value.timeTo);
-                                    const x1 = moment(value.timeFrom);
-                                    const x2 = moment(value.timeTo);
-                                    let diff = x2.diff(x1);
-                                    let duration = moment.utc(diff)
-                                    return (
-                                        <View key={value.id} style={[styles.row, tableStyles.td]}>
-                                            <Text style={tableStyles.row17}>  {tFrom.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}</Text>
-                                            <Text style={tableStyles.row17}>{tFrom.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr</Text>
-                                            <Text style={tableStyles.row17}>{tTo.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr</Text>
-                                            <Text style={tableStyles.row17}>{duration.format('H:mm')} Std.</Text>
-                                            <Text style={tableStyles.row32}>{value.task.title}</Text>
-                                        </View>
-                                    )
-                                })} */}
                                 <ItemsTableRows values={valuesSorted} showAllDates={showAllDates} />
                                 <View style={[styles.row, tableStyles.tf]}>
                                     <Text style={[tableStyles.row100, { fontSize: 16 }]}>Summe: {durationString} Std.</Text>
                                 </View>
                             </View>
                         </View>
+                        {valuesWithRemarks.length && <View style={[styles.section, { border: '1px solid #AAA', padding: 8 }]}>
+                            <Text style={[{ fontSize: 14 }]}>Sonstiges:</Text>
+                            {valuesWithRemarks.map((value) => (
+                                <Text style={[{ marginTop: 4 }]} key={value.id}>- {value.remark} ({new Date(value.timeFrom).toLocaleDateString('de-DE')})</Text>
+                            ))}
+                        </View>}
                     </React.Fragment>
                 )
             })}
