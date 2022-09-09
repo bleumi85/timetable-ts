@@ -114,10 +114,11 @@ export const UserSchedulesForm: React.FC<{ authUser: User | undefined }> = (prop
                     const { errors, touched, isSubmitting, values, setFieldValue, handleChange } = props;
                     return (
                         <Form style={{ padding: 'var(--chakra-space-4)' }}>
-                            <Grid templateColumns='repeat(6, 1fr)' gap={4} mb={6}>
+                            <Grid templateColumns='repeat(6, 1fr)' gap={4} mb={6} alignItems='flex-end'>
                                 <GridItem colSpan={[6, 6, 3]} >
                                     <DatePicker
                                         name='timeFrom'
+                                        label='Arbeitsbeginn'
                                         selected={values.timeFrom}
                                         onChange={(date) => { onDateChange(date, values.timeTo); setFieldValue('timeFrom', date) }}
                                         error={touched.timeFrom && errors.timeFrom}
@@ -126,6 +127,7 @@ export const UserSchedulesForm: React.FC<{ authUser: User | undefined }> = (prop
                                 <GridItem colSpan={[6, 6, 3]} >
                                     <DatePicker
                                         name='timeFrom'
+                                        label='Arbeitsende'
                                         selected={values.timeTo}
                                         onChange={(date) => { onDateChange(values.timeFrom, date); setFieldValue('timeTo', date) }}
                                         error={touched.timeTo && errors.timeTo}
@@ -134,6 +136,7 @@ export const UserSchedulesForm: React.FC<{ authUser: User | undefined }> = (prop
                                 <GridItem colSpan={[6, 6, 2]}>
                                     <Select
                                         name='locationId'
+                                        label='Ort'
                                         value={values.locationId}
                                         onChange={handleChange}
                                         options={locationOptions}
@@ -143,13 +146,14 @@ export const UserSchedulesForm: React.FC<{ authUser: User | undefined }> = (prop
                                 <GridItem colSpan={[6, 6, 2]}>
                                     <Select
                                         name='taskId'
+                                        label='Tätigkeit'
                                         value={values.taskId}
                                         onChange={handleChange}
                                         options={taskOptions}
                                         error={touched.taskId && errors.taskId}
                                     />
                                 </GridItem>
-                                <GridItem colSpan={[6, 6, 2]} border='1px solid' borderColor='gray.200' borderRadius='md' display='flex' alignItems='center' justifyContent='center' maxH="10">
+                                <GridItem colSpan={[6, 6, 2]} border='1px solid' h="10" borderColor='gray.200' borderRadius='md' display='flex' alignItems='center' justifyContent='center' maxH="10">
                                     <Flex color='gray.500'>
                                         <Text fontWeight='bold' mr={2}>Dauer: </Text>
                                         <Text>{duration.hours() > 0 ? duration.format('H:mm') + ' Std.' : duration.format('m') + ' Min.'}</Text>
