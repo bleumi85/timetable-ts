@@ -1,5 +1,5 @@
 import { Button, Container, Grid, GridItem, Heading, Progress, Stack, useToast } from '@chakra-ui/react';
-import { ColorPicker, Input } from 'components/controls';
+import { Checkbox, ColorPicker, Input } from 'components/controls';
 import { LocationRequest, User } from 'features/types';
 import { Form, Formik, FormikHelpers, FormikProps } from 'formik';
 import { history } from 'helpers';
@@ -26,7 +26,8 @@ export const UserLocationsForm: React.FC<{ authUser: User | undefined }> = (prop
         id: data?.id,
         title: data?.title ?? '',
         color: data?.color ?? '#ccc',
-        accountId: authUser?.id ?? ''
+        accountId: authUser?.id ?? '',
+        showCompleteMonth: data?.showCompleteMonth ?? false
     }
 
     const validationSchema = Yup.object().shape({
@@ -60,7 +61,7 @@ export const UserLocationsForm: React.FC<{ authUser: User | undefined }> = (prop
                     return (
                         <Form style={{ padding: 'var(--chakra-space-4)' }}>
                             <Grid templateColumns='repeat(4, 1fr)' gap={4} mb={6}>
-                                <GridItem>
+                                <GridItem rowSpan={2}>
                                     <section className='small'>
                                         <ColorPicker
                                             color={values.color}
@@ -75,6 +76,13 @@ export const UserLocationsForm: React.FC<{ authUser: User | undefined }> = (prop
                                         value={values.title}
                                         onChange={handleChange}
                                         error={touched.title && errors.title}
+                                    />
+                                </GridItem>
+                                <GridItem colSpan={3}>
+                                    <Checkbox
+                                        name='showCompleteMonth'
+                                        label='Ganzen Monat ausgeben'
+                                        checked={values.showCompleteMonth}
                                     />
                                 </GridItem>
                             </Grid>

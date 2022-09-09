@@ -27,6 +27,7 @@ interface ILocation {
     color?: string;
     accountId: string;
     schedulesCount?: number;
+    showCompleteMonth: boolean;
 }
 
 interface ITask {

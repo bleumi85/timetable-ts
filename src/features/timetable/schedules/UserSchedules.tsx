@@ -1,5 +1,5 @@
 import { AttachmentIcon, InfoIcon } from '@chakra-ui/icons';
-import { Button, Center, IconButton, Progress, Stack, Text, Tooltip, useToast } from '@chakra-ui/react';
+import { Box, Button, Center, HStack, IconButton, Menu, MenuButton, MenuItem, MenuList, Progress, Stack, Text, Tooltip, useToast } from '@chakra-ui/react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { dateFormat } from 'app/settings';
 import { DeleteConfirmation, useTable } from 'components';
@@ -27,6 +27,12 @@ export const UserSchedules: React.FC = (): JSX.Element => {
 
 const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element => {
     const { data } = props;
+    const locations = data.map(d => d.location);
+    const uniqueLocations = locations.filter((value, index, self) =>
+        index === self.findIndex((t) => (
+            t.title === value.title
+        ))
+    );
 
     const toast = useToast();
     const [deleteSchedule, { isLoading: isDeleting }] = useDeleteScheduleMutation();
@@ -155,13 +161,34 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
         <>
             <Stack direction='column' maxW='container.xl' spacing={4} p={2} w='100%'>
                 <TblFilter>
-                    <Link to='pdf' state={{ data: selectedRows }}>
+                    {/* <Link to='pdf' state={{ rows: data, selectedRows }}>
                         <IconButton
                             aria-label='create pdf'
                             colorScheme='blue'
                             icon={<MdOutlinePictureAsPdf fontSize='1.5rem' />}
                         />
-                    </Link>
+                    </Link> */}
+                    <Menu>
+                        <MenuButton
+                            as={IconButton}
+                            aria-label='PDF Options'
+                            colorScheme='blue'
+                            icon={<MdOutlinePictureAsPdf fontSize='1.5rem' />}
+                            variant='outline'
+                        />
+                        <MenuList>
+                            {uniqueLocations.map((location) => (
+                                <Link key={location.id} to='pdf' state={{ rows: data, selectedRows, location: location }}>
+                                    <MenuItem key={location.id}>
+                                        <HStack alignItems='center'>
+                                            <Box boxSize='2rem' borderRadius='50%' bg={location.color} />
+                                            <span>{location.title}</span>
+                                        </HStack>
+                                    </MenuItem>
+                                </Link>
+                            ))}
+                        </MenuList>
+                    </Menu>
                 </TblFilter>
                 <TblContainer>
                     <TblHead />

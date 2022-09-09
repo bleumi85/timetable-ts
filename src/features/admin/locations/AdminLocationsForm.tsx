@@ -37,7 +37,8 @@ export const AdminLocationsForm: React.FC = (): JSX.Element => {
         id: data?.id,
         title: data?.title ?? '',
         color: data?.color ?? '#ccc',
-        accountId: data?.accountId ?? ''
+        accountId: data?.accountId ?? '',
+        showCompleteMonth: false
     };
 
     const validationSchema = Yup.object().shape({
