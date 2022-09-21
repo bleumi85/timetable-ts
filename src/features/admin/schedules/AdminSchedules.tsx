@@ -8,6 +8,7 @@ import { ApiAlert } from 'components/controls';
 import { ScheduleAdmin } from 'features/types';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
 import { Link, useOutletContext } from 'react-router-dom';
 
 type OutletProps = {
@@ -39,7 +40,13 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
         columnHelper.accessor('isTransferred', {
             header: '',
             enableColumnFilter: false,
-            enableSorting: false
+            enableSorting: false,
+            cell: (info) => (
+                <Center>{info.getValue()
+                    ? <MdCheckBox fontSize='1.5rem' />
+                    : <MdCheckBoxOutlineBlank fontSize='1.5rem' />
+                }</Center>
+            )
         }),
         columnHelper.accessor(row => `${row.account.lastName}, ${row.account.firstName}`, {
             id: 'account',

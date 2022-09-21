@@ -1,55 +1,42 @@
 import { Button, Heading, Stack } from '@chakra-ui/react';
 import { useGetAccountsQuery, useGetLocationsQuery, useGetSchedulesQuery, useGetTasksQuery } from 'features/timetable';
-import { history } from 'helpers';
 import React from 'react';
-import { MdHouse, MdSchedule, MdTask } from 'react-icons/md';
-import { Link, Outlet } from 'react-router-dom';
+import { MdFace, MdHouse, MdSchedule, MdTask } from 'react-icons/md';
+import { NavLink, Outlet } from 'react-router-dom';
 
 export const Admin: React.FC = (): JSX.Element => {
-    const pathname = history.location?.pathname;
 
     return (
         <Stack direction='column' w='100%' spacing={4}>
             <Heading color='primary.500'>Admin-Bereich</Heading>
             <Stack direction='row' spacing={4}>
-                <Link to='accounts'>
-                    <Button
-                        minW='150px'
-                        colorScheme={pathname?.includes('accounts') ? 'secondary' : 'primary'}
-                    >
-                        Accounts
-                    </Button>
-                </Link>
-                <Link to='schedules'>
-                    <Button
-                        minW='150px'
-                        colorScheme={pathname?.includes('schedules') ? 'secondary' : 'primary'}
-                        leftIcon={<MdSchedule fontSize='1.4rem' />}
-                    >
-                        Buchungen
-                    </Button>
-                </Link>
-                <Link to='locations'>
-                    <Button
-                        minW='150px'
-                        colorScheme={pathname?.includes('locations') ? 'secondary' : 'primary'}
-                        leftIcon={<MdHouse fontSize='1.4rem' />}
-                    >
-                        Orte
-                    </Button>
-                </Link>
-                <Link to='tasks'>
-                    <Button
-                        minW='150px'
-                        colorScheme={pathname?.includes('tasks') ? 'secondary' : 'primary'}
-                        leftIcon={<MdTask fontSize='1.4rem' />}
-                    >
-                        Tätigkeiten
-                    </Button>
-                </Link>
+                <NavLinkHelper to='accounts' label='Accounts' icon={<MdFace fontSize='1.5rem' />} />
+                <NavLinkHelper to='schedules' label='Buchungen' icon={<MdSchedule fontSize='1.5rem' />} />
+                <NavLinkHelper to='locations' label='Orte' icon={<MdHouse fontSize='1.5rem' />} />
+                <NavLinkHelper to='tasks' label='Tätigkeiten' icon={<MdTask fontSize='1.5rem' />} />
             </Stack>
             <OutletContainer />
         </Stack>
+    )
+}
+
+type NavLinkerHelperProps = {
+    to: string;
+    label: string;
+    icon?: React.ReactElement;
+}
+
+const NavLinkHelper: React.FC<NavLinkerHelperProps> = (props): JSX.Element => {
+    const { to, label, icon } = props;
+
+    return (
+        <NavLink to={to}>
+            {({ isActive }) => (
+                <Button variant={isActive ? 'solid' : 'outline'} colorScheme='primary' minW='150px' leftIcon={icon}>
+                    {label}
+                </Button>
+            )}
+        </NavLink>
     )
 }
 
