@@ -314,9 +314,18 @@ export function useTable<T>(data: T[], columns: ColumnDef<T, any>[], enableColum
 };
 
 function Filter({ column }: { column: Column<any, unknown> }): JSX.Element {
+    const facetedUniqueValues = Array.from(column.getFacetedUniqueValues().keys())
     const columnFilterValue = column.getFilterValue();
 
-    const sortedUniqueValues = useMemo(() => Array.from(column.getFacetedUniqueValues().keys()).sort(), [column]);
+    const sortedUniqueValues = useMemo(() => {
+        if (arrayCheck(facetedUniqueValues)) {
+            return facetedUniqueValues.sort();
+        } else {
+            const temp = facetedUniqueValues.map((value) => value.title).sort();
+            return [...new Set(temp)]
+        }
+    }, [facetedUniqueValues,]);
+
     const heading = column.columnDef.header === '' ? 'Suche' : column.columnDef.header;
 
     return (
@@ -324,7 +333,7 @@ function Filter({ column }: { column: Column<any, unknown> }): JSX.Element {
             <Select
                 borderColor='secondary.500'
                 maxW='300px'
-                placeholder={`${heading}... (${column.getFacetedUniqueValues().size})`}
+                placeholder={`${heading}... (${sortedUniqueValues.length})`}
                 value={(columnFilterValue ?? '') as string}
                 onChange={(e) => column.setFilterValue(e.target.value)}
             >
@@ -334,6 +343,19 @@ function Filter({ column }: { column: Column<any, unknown> }): JSX.Element {
             </Select>
         </>
     )
+}
+
+function arrayCheck(value: any): boolean {
+    if (Array.isArray(value)) {
+        var somethingIsNotString = false;
+        value.forEach(function (item) {
+            if (typeof item !== 'string') {
+                somethingIsNotString = true;
+            }
+        });
+        return !somethingIsNotString && value.length > 0
+    }
+    return false;
 }
 
 function IndeterminateCheckbox(props: CheckboxProps) {

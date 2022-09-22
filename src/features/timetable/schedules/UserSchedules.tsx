@@ -1,15 +1,21 @@
 import { AttachmentIcon, InfoIcon } from '@chakra-ui/icons';
-import { Box, Button, Center, HStack, IconButton, Menu, MenuButton, MenuItem, MenuList, Progress, Stack, Text, Tooltip, useToast } from '@chakra-ui/react';
+import { Avatar, Box, Button, Center, HStack, IconButton, Menu, MenuButton, MenuItem, MenuList, Progress, Stack, Tag, TagLabel, Text, Tooltip, useToast } from '@chakra-ui/react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { dateFormat } from 'app/settings';
 import { DeleteConfirmation, useTable } from 'components';
 import { ApiAlert } from 'components/controls';
-import { ScheduleAdmin } from 'features/types';
+import { Location, ScheduleAdmin, Task } from 'features/types';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { MdOutlinePictureAsPdf } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import { getErrorMessage, useDeleteScheduleMutation, useGetSchedulesQuery } from '../timetableApi';
+import { IconName } from '@fortawesome/fontawesome-svg-core';
+
+library.add(fas);
 
 export const UserSchedules: React.FC = (): JSX.Element => {
     let { data: schedules = [], isLoading, error } = useGetSchedulesQuery();
@@ -90,11 +96,62 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
                 </Center>
             }
         }),
-        columnHelper.accessor('location.title', {
-            header: 'Ort'
+        columnHelper.accessor('location', {
+            header: 'Ort',
+            cell: info => {
+                const { icon, title, color } = info.getValue()
+                const myIcon = icon as IconName;
+                return (
+                    <Tag size={'lg'} w={'100%'} variant={'outline'} fontWeight={'normal'} color='black' fontSize={'var(--chakra-fontSizes-sm)'} boxShadow={`0 0 0px 1px ${color}`}>
+                        {icon && <Avatar
+                            bg={color}
+                            color='white'
+                            size='xs'
+                            ml={-1} mr={2}
+                            icon={<FontAwesomeIcon icon={['fas', myIcon]} size='lg' />}
+                        />}
+                        <TagLabel>{title}</TagLabel>
+                    </Tag>
+                )
+            },
+            filterFn: (row, columnId, value) => {
+                let rowValue = row.getValue(columnId) as Location;
+                return rowValue.title === value;
+            },
+            sortingFn: (colA, colB, columnId) => {
+                let columnA = (colA.getValue(columnId) as Location);
+                let columnB = (colB.getValue(columnId) as Location);
+                return columnA.title.localeCompare(columnB.title);
+            }
         }),
-        columnHelper.accessor('task.title', {
-            header: 'Tätigkeit'
+        columnHelper.accessor('task', {
+            header: 'Tätigkeit',
+            cell: info => {
+                const { title, color, icon } = info.getValue();
+                const myIcon = icon as IconName;
+                return (
+                    <Tag size={'lg'} w={'100%'} variant={'outline'} fontWeight={'normal'} color='black' fontSize={'var(--chakra-fontSizes-sm)'} boxShadow={`0 0 0px 1px ${color}`}>
+                        {icon && <Avatar
+                            bg={color}
+                            color='white'
+                            size='xs'
+                            ml={-1} mr={2}
+                            icon={<FontAwesomeIcon icon={['fas', myIcon]} size='lg' />}
+                        />}
+                        <TagLabel>{title}</TagLabel>
+                    </Tag>
+                )
+            },
+            filterFn: (row, columnId, value) => {
+                let rowValue = row.getValue(columnId) as Task;
+                return rowValue.title === value;
+            },
+            sortingFn: (colA, colB, columnId) => {
+                let columnA = (colA.getValue(columnId) as Task);
+                let columnB = (colB.getValue(columnId) as Task);
+
+                return columnA.title.localeCompare(columnB.title)
+            }
         }),
         columnHelper.accessor('remark', {
             header: () => <Center>Bemerkung</Center>,

@@ -28,6 +28,7 @@ interface ILocation {
     accountId: string;
     schedulesCount?: number;
     showCompleteMonth: boolean;
+    icon?: string;
 }
 
 interface ITask {
@@ -36,6 +37,7 @@ interface ITask {
     color: string;
     accountId: string;
     schedulesCount?: number;
+    icon?: string;
 }
 
 interface ITaskRequest extends Omit<ITask, 'id'>, Partial<Pick<ITask, 'id'>> { }
