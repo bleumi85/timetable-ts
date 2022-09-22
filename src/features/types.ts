@@ -62,7 +62,8 @@ interface ISchedule {
 interface IScheduleAdmin extends Omit<ISchedule, 'accountId' | 'locationId' | 'taskId'> {
     account: Pick<IUser, 'id' | 'firstName' | 'lastName'>,
     location: Omit<ILocation, 'accountId'>,
-    task: Omit<ITask, 'accountId'>
+    task: Omit<ITask, 'accountId'>,
+    hasConflict: boolean
 }
 
 interface IUserRequest extends Partial<Pick<IUser, 'id' | 'firstName' | 'lastName' | 'email' | 'role'>> {

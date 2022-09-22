@@ -1,4 +1,4 @@
-import { AttachmentIcon, InfoIcon } from '@chakra-ui/icons';
+import { AttachmentIcon, InfoIcon, WarningTwoIcon } from '@chakra-ui/icons';
 import { Avatar, Box, Button, Center, HStack, IconButton, Menu, MenuButton, MenuItem, MenuList, Progress, Stack, Tag, TagLabel, Text, Tooltip, useToast } from '@chakra-ui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -8,12 +8,15 @@ import { dateFormat } from 'app/settings';
 import { DeleteConfirmation, useTable } from 'components';
 import { ApiAlert } from 'components/controls';
 import { Location, ScheduleAdmin, Task } from 'features/types';
-import moment from 'moment';
+import * as Moment from 'moment';
+import { extendMoment } from 'moment-range';
 import React, { useCallback, useMemo, useState } from 'react';
 import { MdOutlinePictureAsPdf } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import { getErrorMessage, useDeleteScheduleMutation, useGetSchedulesQuery } from '../timetableApi';
 import { IconName } from '@fortawesome/fontawesome-svg-core';
+
+const moment = extendMoment(Moment);
 
 library.add(fas);
 
@@ -32,7 +35,7 @@ export const UserSchedules: React.FC = (): JSX.Element => {
 }
 
 const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element => {
-    const { data } = props;
+    let { data } = props;
     const locations = data.map(d => d.location);
     const uniqueLocations = locations.filter((value, index, self) =>
         index === self.findIndex((t) => (
@@ -82,7 +85,7 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
 
     const columnHelper = createColumnHelper<ScheduleAdmin>();
 
-    const columns = useMemo<ColumnDef<ScheduleAdmin, any>[]>(() => [
+    const columnsOk = useMemo<ColumnDef<ScheduleAdmin, any>[]>(() => [
         columnHelper.accessor(row => {
             return row.isTransferred ? 'JA' : 'NEIN'
         }, {
@@ -206,7 +209,24 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
             },
             enableColumnFilter: false
         })
-    ], [columnHelper, isDeleting, showDeleteModal])
+    ], [columnHelper, isDeleting, showDeleteModal]);
+
+    const columnsError = useMemo<ColumnDef<ScheduleAdmin, any>[]>(() => [
+        ...columnsOk,
+        columnHelper.accessor('hasConflict', {
+            header: 'Konflikt?',
+            cell: (info) => (
+                <Center>
+                    {info.getValue() ? <WarningTwoIcon fontSize={'1.5rem'} color='red.500' /> : null}
+                </Center>
+            )
+        })
+    ], [columnHelper, columnsOk]);
+
+    const hasNoConflicts = data.every(s => s.hasConflict === false);
+
+
+    const columns = hasNoConflicts ? columnsOk : columnsError;
 
     const {
         TblFilter, TblContainer, TblHead, TblBody, TblPagination, getSelectedRows
@@ -225,6 +245,7 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
                             colorScheme='blue'
                             icon={<MdOutlinePictureAsPdf fontSize='1.5rem' />}
                             variant='outline'
+                            disabled={!hasNoConflicts}
                         />
                         <MenuList>
                             {uniqueLocations.map((location) => (

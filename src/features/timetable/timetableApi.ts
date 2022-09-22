@@ -2,6 +2,10 @@ import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError 
 import { RootState } from 'app/store';
 import { authActions } from 'features/account/authSlice';
 import { Location, LocationRequest, Schedule, ScheduleAdmin, ScheduleRequest, Task, TaskRequest, User, UserRequest } from 'features/types';
+import * as Moment from 'moment';
+import { extendMoment } from 'moment-range';
+
+const moment = extendMoment(Moment);
 
 const baseUrl = process.env.REACT_APP_API_URL;
 
@@ -168,7 +172,14 @@ export const timetableApi = createApi({
                     [
                         ...result.map(({ id }) => ({ type: 'Schedules', id } as const)),
                         { type: 'Schedules', id: 'ScheduleLIST' }
-                    ] : [{ type: 'Schedules', id: 'ScheduleLIST' }]
+                    ] : [{ type: 'Schedules', id: 'ScheduleLIST' }],
+            transformResponse: (response: ScheduleAdmin[]) => {
+                const data = response.map((schedule) => {
+                    const hasConflict = !overlaps(response, schedule);
+                    return { ...schedule, hasConflict }
+                })
+                return data;
+            }
         }),
         addSchedule: build.mutation<ScheduleRequest, Partial<ScheduleRequest>>({
             query: (body) => ({
@@ -231,4 +242,28 @@ export function getErrorMessage(err: unknown): string {
         errMsg = err.message
     }
     return errMsg;
+}
+
+function overlaps(schedules: ScheduleAdmin[], schedule: ScheduleAdmin): boolean {
+    const rangeHelper = moment.range('1999-12-31/2000-01-01');
+    const ranges = schedules.map((s) => {
+        if (s.account.id !== schedule.account.id || s.id === schedule.id) return rangeHelper;
+        const start = moment(s.timeFrom);
+        const end = moment(s.timeTo);
+        return moment.range(start, end);
+    }).filter(r => !r.isSame(rangeHelper))
+
+    if (ranges.length === 0) return true;
+
+    const start1 = moment(schedule.timeFrom);
+    const end1 = moment(schedule.timeTo);
+    const range1 = moment.range(start1, end1);
+
+    let hasNoConflict = true;
+
+    for (let i = 0; i < ranges.length; i++) {
+        hasNoConflict = hasNoConflict && !ranges[i].overlaps(range1)
+    }
+
+    return hasNoConflict;
 }
