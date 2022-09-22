@@ -154,7 +154,7 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
             }
         }),
         columnHelper.accessor('remark', {
-            header: () => <Center>Bemerkung</Center>,
+            header: () => <Center>Info</Center>,
             cell: info =>
                 info.getValue() && <Center><Tooltip label={info.getValue()}>
                     <InfoIcon fontSize='1.25rem' color='primary.500' />

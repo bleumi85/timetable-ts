@@ -1,4 +1,4 @@
-import { Box, Button, Center, IconButton, Progress, Stack, useToast } from '@chakra-ui/react';
+import { Button, Center, IconButton, Progress, Stack, useToast } from '@chakra-ui/react';
 import { IconName } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
