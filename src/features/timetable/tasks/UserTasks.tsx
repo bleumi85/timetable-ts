@@ -1,4 +1,6 @@
-import { Box, Button, Center, Progress, Stack, useToast } from '@chakra-ui/react';
+import { Box, Button, Center, IconButton, Progress, Stack, useToast } from '@chakra-ui/react';
+import { IconName } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { DeleteConfirmation, useTable } from 'components';
 import { ApiAlert } from 'components/controls';
@@ -67,10 +69,21 @@ const FormattedTable: React.FC<{ data: Task[] }> = (props): JSX.Element => {
     const columnHelper = createColumnHelper<Task>();
 
     const columns = useMemo<ColumnDef<Task, any>[]>(() => [
-        columnHelper.accessor('color', {
+        columnHelper.accessor(row => row, {
+            id: 'color',
             header: () => <Center>Farbe</Center>,
             cell: info => {
-                return info.getValue() && <Center><Box w="8" h="8" borderRadius='md' bg={info.getValue()} /></Center>
+                const { id, color, icon } = info.getValue();
+                const myIcon = icon as IconName;
+                return (
+                    <Center>
+                        <IconButton
+                            aria-label={`color-${id}`}
+                            bg={color}
+                            icon={myIcon && <FontAwesomeIcon icon={['fas', myIcon]} size='lg' color='white' />}
+                        />
+                    </Center>
+                )
             }
         }),
         columnHelper.accessor('title', { header: 'Titel' }),
