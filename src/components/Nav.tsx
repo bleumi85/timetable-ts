@@ -106,10 +106,13 @@ const MenuLinks: React.FC<MenuLinksProps> = (props): JSX.Element => {
                 justify={['center', 'center', 'flex-end', 'flex-end']}
                 pt={[4, 4, 0, 0]}
             >
+                {(!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && (
+                    <MenuItem to='playground'>Spielwiese</MenuItem>
+                )}
                 {authUser && userLinks.map(({ label, to }) => (
                     <MenuItem key={to} to={to}>{label}</MenuItem>
                 ))}
-                {showAdmin && adminLinks.map(({label, to}) => (
+                {showAdmin && adminLinks.map(({ label, to }) => (
                     <MenuItem key={to} to={to}>{label}</MenuItem>
                 ))}
                 {authUser ? (
@@ -130,7 +133,7 @@ interface MenuItemProps extends TextProps {
 const MenuItem: React.FC<MenuItemProps> = (props): JSX.Element => (
     <NavLink
         to={props.to}
-        style={({isActive}) => {
+        style={({ isActive }) => {
             return {
                 display: 'block',
                 fontWeight: isActive ? 'bold' : ''

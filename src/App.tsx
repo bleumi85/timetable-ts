@@ -1,6 +1,6 @@
 import { Container } from '@chakra-ui/react';
 import { useAppDispatch, useAppSelector } from 'app/hooks';
-import { Nav, Page404, PrivateRoute } from 'components';
+import { Nav, Page404, Playground, PrivateRoute } from 'components';
 import { Login, Profile } from 'features/account';
 import { authActions } from 'features/account/authSlice';
 import { Admin, AdminMain } from 'features/admin';
@@ -52,6 +52,9 @@ const App: React.FC = (): JSX.Element => {
                         path='404'
                         element={<Page404 />}
                     />
+                    {(!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && (
+                        <Route path='playground' element={<Playground />} />
+                    )}
                     <Route path='account'>
                         <Route
                             path='login'
