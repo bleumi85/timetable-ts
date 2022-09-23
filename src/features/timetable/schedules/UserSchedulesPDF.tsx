@@ -3,15 +3,21 @@ import { Document, Page, PDFViewer, StyleSheet, Text, usePDF, View } from '@reac
 import { SimpleConfirmation } from 'components';
 import { Location, ScheduleAdmin } from 'features/types';
 import { groupBy, history } from 'helpers';
-import moment from 'moment';
+import * as Moment from 'moment';
+import 'moment/locale/de';
+import { extendMoment } from 'moment-range';
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { getErrorMessage, useUpdateSchedulesPDFMutation } from '../timetableApi';
+import { getErrorMessage, useAddFileMutation, useUpdateSchedulesPDFMutation } from '../timetableApi';
+
+const moment = extendMoment(Moment);
+moment.locale('de');
 
 export const UserSchedulesPDF: React.FC = (): JSX.Element => {
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [updateSchedules] = useUpdateSchedulesPDFMutation();
+    const [addFile] = useAddFileMutation();
 
     const { rows, selectedRows, location } = history?.location?.state as {
         rows: ScheduleAdmin[],
@@ -29,6 +35,14 @@ export const UserSchedulesPDF: React.FC = (): JSX.Element => {
         }
     }, [location.id, rows, selectedRows]);
 
+    const locationStr = data[0].location.title;
+    const dates = data.map(d => moment(d.timeFrom));
+    const dateMinStr = moment.min(dates).format('MMMMYY');
+    const dateMaxStr = moment.max(dates).format('MMMMYY');
+    const fileName = dateMinStr === dateMaxStr
+        ? `${locationStr}_${dateMinStr}.pdf`
+        : `${locationStr}_${dateMinStr}_bis_${dateMaxStr}.pdf`
+
     const [instance] = usePDF({ document: <MyDocument data={data} showAllDates={location.showCompleteMonth} /> });
 
     const submitDownload = async () => {
@@ -36,8 +50,13 @@ export const UserSchedulesPDF: React.FC = (): JSX.Element => {
             if (instance.url) {
                 let alink = document.createElement('a');
                 alink.href = instance.url;
-                alink.download = 'Testdatei.pdf';
+                alink.download = fileName;
                 alink.click();
+            }
+            if (instance.blob) {
+                var fd = new FormData();
+                fd.append('pdf', instance.blob, fileName);
+                await addFile(fd).unwrap();
             }
             const ids = data.map(value => value.id);
             await updateSchedules(ids).unwrap();
@@ -71,8 +90,6 @@ export const UserSchedulesPDF: React.FC = (): JSX.Element => {
         history.navigate && history.navigate('/schedules');
     }
 
-    // const fileName = data[0].location.title.toLocaleLowerCase() + '_' + moment(data[0].timeFrom).format('YYYY_MM') + '.pdf';
-
     return (
         <>
             <Stack direction='row' w='100%' spacing={8}>
@@ -97,7 +114,7 @@ export const UserSchedulesPDF: React.FC = (): JSX.Element => {
                 isOpen={isOpen}
                 onClose={onClose}
                 onConfirm={submitDownload}
-                message='1234'
+                message={`Möchtest du die Datei '${fileName} mit den aktuellen Daten speichern?`}
             />
         </>
     )

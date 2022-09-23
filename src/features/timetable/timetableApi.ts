@@ -51,7 +51,7 @@ const baseQueryWithReauth: BaseQueryFn<
 export const timetableApi = createApi({
     reducerPath: 'timetableApi',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['Accounts', 'Locations', 'Schedules', 'Tasks'],
+    tagTypes: ['Accounts', 'Files', 'Locations', 'Schedules', 'Tasks'],
     endpoints: (build) => ({
         // Accounts
         getAccounts: build.query<User[], void>({
@@ -89,6 +89,14 @@ export const timetableApi = createApi({
                 method: 'delete'
             }),
             invalidatesTags: (result, error, id) => [{ type: 'Accounts', id }]
+        }),
+        // Files
+        addFile: build.mutation({
+            query: (body) => ({
+                url: '/files/single',
+                method: 'POST',
+                body
+            })
         }),
         // Locations
         getLocations: build.query<Location[], void>({
@@ -220,6 +228,7 @@ export const timetableApi = createApi({
 });
 
 export const {
+    useAddFileMutation,
     useGetAccountsQuery, useAddAccountMutation, useGetAccountQuery, useUpdateAccountMutation, useDeleteAccountMutation,
     useGetLocationsQuery, useAddLocationMutation, useGetLocationQuery, useUpdateLocationMutation, useDeleteLocationMutation,
     useGetSchedulesQuery, useAddScheduleMutation, useGetScheduleQuery, useUpdateScheduleMutation, useUpdateSchedulesPDFMutation, useDeleteScheduleMutation,
