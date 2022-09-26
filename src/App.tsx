@@ -8,6 +8,7 @@ import { AdminAccounts, AdminAccountsForm } from 'features/admin/accounts';
 import { AdminLocations, AdminLocationsForm } from 'features/admin/locations';
 import { AdminSchedules, AdminSchedulesForm } from 'features/admin/schedules';
 import { AdminTasks, AdminTasksForm } from 'features/admin/tasks';
+import { UserFiles } from 'features/timetable/files/UserFiles';
 import { UserLocations, UserLocationsForm } from 'features/timetable/locations';
 import { UserSchedules, UserSchedulesForm, UserSchedulesPDF } from 'features/timetable/schedules';
 import { UserTasks, UserTasksForm } from 'features/timetable/tasks';
@@ -93,6 +94,9 @@ const App: React.FC = (): JSX.Element => {
                             <Route path='edit/:id' element={<AdminTasksForm />} />
                             <Route path='*' element={<Navigate to='/admin/locations' />} />
                         </Route>
+                    </Route>
+                    <Route path='files'>
+                        <Route path=':id' element={<UserFiles authUser={authUser} />} />
                     </Route>
                     <Route path='locations'>
                         <Route index element={<UserLocations />} />
