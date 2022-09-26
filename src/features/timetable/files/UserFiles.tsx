@@ -52,8 +52,6 @@ export const UserFiles: React.FC<{ authUser: User | undefined }> = (props): JSX.
             .catch(console.error)
     }, [authUser?.jwtToken, id]);
 
-    console.log(contentDisposition)
-
     return (
         <Box w='100%' p={4}>
             {contentDisposition !== '' && <Heading mb={4} size='md'>{contentDisposition.split('-')[1].split('.')[0].replaceAll('_', ' ')}</Heading>}
