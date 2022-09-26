@@ -86,17 +86,23 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
     const columnHelper = createColumnHelper<ScheduleAdmin>();
 
     const columnsOk = useMemo<ColumnDef<ScheduleAdmin, any>[]>(() => [
-        columnHelper.accessor(row => {
-            return row.isTransferred ? 'JA' : 'NEIN'
-        }, {
-            id: 'isTransferred',
+        columnHelper.accessor('fileId', {
+            id: 'fileIdBool',
             header: '',
             enableSorting: false,
-            cell: info => {
-                const isTransferred = info.getValue();
-                return <Center>
-                    {isTransferred === 'JA' ? <AttachmentIcon color='green.500' fontSize='1.25rem' /> : null}
+            cell: (info) => (
+                <Center>
+                    {info.getValue() !== null
+                        ? <Link to={`/files/${info.getValue()}`}>
+                            <AttachmentIcon color='green.500' fontSize='1.25rem' />
+                        </Link>
+                        : null
+                    }
                 </Center>
+            ),
+            filterFn: (row, columnId, value) => {
+                let rowValue: string = (!!row.getValue(columnId)).toString().toUpperCase();
+                return rowValue === value
             }
         }),
         columnHelper.accessor('location', {
@@ -225,12 +231,11 @@ const FormattedTable: React.FC<{ data: ScheduleAdmin[] }> = (props): JSX.Element
 
     const hasNoConflicts = data.every(s => s.hasConflict === false);
 
-
     const columns = hasNoConflicts ? columnsOk : columnsError;
 
     const {
         TblFilter, TblContainer, TblHead, TblBody, TblPagination, getSelectedRows
-    } = useTable<ScheduleAdmin>(data, columns, true, [{ id: 'isTransferred', value: 'NEIN' }], true);
+    } = useTable<ScheduleAdmin>(data, columns, true, [{ id: 'fileIdBool', value: 'FALSE' }], true);
 
     const selectedRows: ScheduleAdmin[] = getSelectedRows.map(row => row.original);
 

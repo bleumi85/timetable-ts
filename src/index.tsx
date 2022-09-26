@@ -9,7 +9,8 @@ import App from './App';
 const theme = extendTheme({
     colors: {
         primary: baseTheme.colors.blue,
-        secondary: baseTheme.colors.purple
+        secondary: baseTheme.colors.purple,
+        danger: baseTheme.colors.red,
     },
     styles: {
         global: {

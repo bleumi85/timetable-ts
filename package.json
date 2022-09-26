@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "copy-worker": "node ./scripts/copy-worker.js",
     "predeploy": "yarn run build",
     "deploy": "netlify deploy --prod --dir=build",
     "start": "react-scripts start",
@@ -41,6 +42,7 @@
     "react-datepicker": "^4.8.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",
+    "react-pdf": "^5.7.2",
     "react-redux": "^8.0.2",
     "react-router-dom": "^6.3.0",
     "react-scripts": "^5.0.1",

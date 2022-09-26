@@ -57,6 +57,7 @@ interface ISchedule {
     accountId: string;
     locationId: string;
     taskId: string;
+    fileId?: string;
 }
 
 interface IScheduleAdmin extends Omit<ISchedule, 'accountId' | 'locationId' | 'taskId'> {

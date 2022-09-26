@@ -122,11 +122,15 @@ export function useTable<T>(data: T[], columns: ColumnDef<T, any>[], enableColum
             <Stack direction='row' flexGrow={1} spacing={4}>
                 {table.getHeaderGroups().map(headerGroup => {
                     return headerGroup.headers.map((header) => {
-                        return (
-                            header.column.getCanFilter() ? (
-                                <Filter key={header.id} column={header.column} />
-                            ) : null
-                        )
+                        const canFilter = header.column.getCanFilter();
+                        const isBoolean = header.column.id.endsWith('Bool');
+                        if (canFilter && isBoolean) {
+                            return <BoolFilter key={header.id} column={header.column} />
+                        } else if (canFilter) {
+                            return <Filter key={header.id} column={header.column} />
+                        } else {
+                            return null
+                        }
                     })
                 })}
             </Stack>
@@ -312,6 +316,24 @@ export function useTable<T>(data: T[], columns: ColumnDef<T, any>[], enableColum
         TblFilter, TblContainer, TblHead, TblBody, TblPagination, TblJson, getSelectedRows
     }
 };
+
+function BoolFilter({ column }: { column: Column<any, unknown> }): JSX.Element {
+    const heading = column.columnDef.header === '' ? 'Suche' : column.columnDef.header;
+    const columnFilterValue = column.getFilterValue();
+
+    return (
+        <Select
+            borderColor='secondary.500'
+            maxW='300px'
+            placeholder={`${heading}... (2)`}
+            value={(columnFilterValue ?? '') as string}
+            onChange={(e) => column.setFilterValue(e.target.value)}
+        >
+            <option value='TRUE'>JA</option>
+            <option value='FALSE'>NEIN</option>
+        </Select>
+    )
+}
 
 function Filter({ column }: { column: Column<any, unknown> }): JSX.Element {
     const facetedUniqueValues = Array.from(column.getFacetedUniqueValues().keys())
