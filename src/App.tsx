@@ -8,7 +8,7 @@ import { AdminAccounts, AdminAccountsForm } from 'features/admin/accounts';
 import { AdminLocations, AdminLocationsForm } from 'features/admin/locations';
 import { AdminSchedules, AdminSchedulesForm } from 'features/admin/schedules';
 import { AdminTasks, AdminTasksForm } from 'features/admin/tasks';
-import { UserFiles } from 'features/timetable/files/UserFiles';
+import { UserFiles } from 'features/timetable/files';
 import { UserLocations, UserLocationsForm } from 'features/timetable/locations';
 import { UserSchedules, UserSchedulesForm, UserSchedulesPDF } from 'features/timetable/schedules';
 import { UserTasks, UserTasksForm } from 'features/timetable/tasks';
